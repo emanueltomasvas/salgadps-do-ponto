@@ -7,134 +7,124 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --red: #C8191A; --red-dark: #a01415; --red-light: #f5e0e0;
-    --yellow: #F9D800; --yellow-light: #fffbe0;
-    --white: #ffffff; --gray-50: #fafafa; --gray-100: #f4f4f4;
-    --gray-200: #e8e8e8; --gray-400: #aaa; --gray-600: #666;
-    --gray-900: #1a1a1a; --radius-sm: 8px; --radius-md: 12px; --radius-lg: 18px;
+    --red: #C8191A; --yellow: #F9D800; --yellow-light: #fffbe0;
+    --white: #ffffff; --gray-100: #f4f4f4; --gray-200: #e8e8e8;
+    --gray-400: #aaa; --gray-600: #666; --gray-900: #1a1a1a;
+    --radius-md: 12px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { font-family: 'Nunito Sans', sans-serif; background: #ddd; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; }
+  body { font-family: 'Nunito Sans', sans-serif; background: #ddd; display: flex; justify-content: center; }
   .app { width: 100%; max-width: 480px; min-height: 100vh; background: var(--white); display: flex; flex-direction: column; position: relative; }
-  @media (min-width: 480px) { body { padding: 20px 0; align-items: center; } .app { min-height: 95vh; border-radius: 24px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); overflow: hidden; } }
   .screen { display: none; flex-direction: column; flex: 1; }
   .screen.active { display: flex; }
-  .header { background: var(--red); padding: 18px 20px 16px; flex-shrink: 0; }
-  .header-title { color: var(--yellow); font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 800; }
-  .header-sub { color: rgba(249,216,0,0.6); font-size: 12px; margin-top: 3px; }
-  .body { flex: 1; overflow-y: auto; padding: 18px 16px 16px; }
-  .nav { background: var(--red); display: flex; justify-content: space-around; padding: 10px 0 14px; flex-shrink: 0; }
-  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 0 14px; color: rgba(249,216,0,0.5); font-weight: 700; font-size: 10px; }
+  .header { background: var(--red); padding: 18px 20px; color: var(--yellow); flex-shrink: 0; }
+  .body { flex: 1; overflow-y: auto; padding: 16px; }
+  .nav { background: var(--red); display: flex; justify-content: space-around; padding: 12px 0; flex-shrink: 0; }
+  .nav-item { color: rgba(249,216,0,0.5); font-weight: 700; font-size: 11px; cursor: pointer; text-align: center; }
   .nav-item.active { color: var(--yellow); }
-  .btn { width: 100%; border: none; border-radius: var(--radius-md); padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; transition: 0.2s; }
+  .btn { width: 100%; border: none; border-radius: var(--radius-md); padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Nunito'; }
   .btn-primary { background: var(--red); color: var(--yellow); }
   .btn-secondary { background: var(--gray-100); color: var(--red); border: 1px solid var(--gray-200); }
-  .field { margin-bottom: 14px; }
-  .field label { display: block; font-size: 11px; font-weight: 800; color: var(--gray-600); margin-bottom: 6px; text-transform: uppercase; }
-  .field input, .field select { width: 100%; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 14px; outline: none; }
-  .product-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--gray-100); }
-  .cad-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #fdfdfd; border: 1px solid #eee; border-radius: 10px; margin-bottom: 8px; }
-  .cad-actions { display: flex; gap: 8px; }
-  .btn-icon { background: #eee; border: none; padding: 8px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  .edit-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center; backdrop-filter: blur(2px); }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 11px; font-weight: 800; color: var(--gray-600); margin-bottom: 4px; text-transform: uppercase; }
+  .field input, .field select, .field textarea { width: 100%; border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 12px; font-size: 14px; font-family: inherit; }
+  
+  /* Estilo Categorias no Catálogo */
+  .cat-group { margin-bottom: 25px; }
+  .cat-title { background: #f8f8f8; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 800; color: var(--red); margin-bottom: 10px; border-left: 4px solid var(--red); }
+  
+  .product-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; position: relative; }
+  
+  /* Menu 3 Pontos */
+  .menu-dots { cursor: pointer; padding: 5px 10px; font-size: 20px; color: var(--gray-400); }
+  .dropdown { display: none; position: absolute; right: 0; top: 40px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border-radius: 8px; z-index: 10; width: 140px; overflow: hidden; }
+  .dropdown.active { display: block; }
+  .dropdown-item { padding: 12px; font-size: 13px; font-weight: 600; color: var(--gray-900); border-bottom: 1px solid #f4f4f4; cursor: pointer; }
+  .dropdown-item:last-child { border: none; }
+  .dropdown-item:hover { background: #f9f9f9; }
+
+  .edit-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center; }
   .edit-modal-overlay.open { display:flex; }
-  .edit-modal { background:#fff; padding:24px; border-radius:20px; width:90%; max-width:400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-  .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 13px; opacity: 0; transition: 0.3s; z-index: 999; pointer-events: none; }
+  .edit-modal { background:#fff; padding:20px; border-radius:15px; width:90%; max-width:400px; }
+  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 12px; opacity: 0; transition: 0.3s; z-index: 999; }
   .toast.show { opacity: 1; }
 </style>
 </head>
-<body>
+<body onclick="window.closeAllDropdowns(event)">
 <div class="app">
 
   <div class="screen active" id="screen-login">
-    <div style="background: var(--red); padding: 60px 20px; text-align: center; color: var(--yellow);">
-      <h1 style="font-family: 'Nunito'; font-weight: 900; font-size: 32px;">Salgados do Ponto.</h1>
-    </div>
+    <div style="background: var(--red); padding: 50px 20px; text-align: center;"><h1 style="color:var(--yellow); font-family:'Nunito'; font-weight:900;">Salgados do Ponto.</h1></div>
     <div class="body">
-      <div class="field"><label>Seu Nome</label><input type="text" id="login-name" placeholder="Quem está contando?"></div>
+      <div class="field"><label>Nome</label><input type="text" id="login-name"></div>
       <div class="field"><label>Data</label><input type="date" id="login-date"></div>
-      <button class="btn btn-primary" onclick="window.doLogin()">Acessar Sistema</button>
+      <button class="btn btn-primary" onclick="window.doLogin()">Entrar</button>
     </div>
   </div>
 
   <div class="screen" id="screen-order">
-    <div class="header">
-        <div class="header-title">Novo Pedido</div>
-        <div id="order-info" class="header-sub"></div>
-    </div>
+    <div class="header"><div id="order-info" style="font-weight:800;"></div></div>
     <div class="body">
-      <div id="order-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:10px;"></div>
+      <div id="order-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:12px;"></div>
       <div id="order-products"></div>
+      <div class="field" style="margin-top:20px;">
+        <label>Observação do Pedido</label>
+        <textarea id="order-obs" rows="2" placeholder="Ex: Avisar quando sair..."></textarea>
+      </div>
     </div>
-    <div style="padding:15px; border-top:1px solid #eee;"><button class="btn btn-primary" onclick="window.navigate('review')">Revisar e Enviar</button></div>
-    <div class="nav">
-      <div class="nav-item active" onclick="window.navigate('order')">Pedido</div>
-      <div class="nav-item" onclick="window.navigate('history')">Histórico</div>
-      <div class="nav-item" onclick="window.navigate('catalog')">Produtos</div>
-    </div>
+    <div style="padding:15px;"><button class="btn btn-primary" onclick="window.navigate('review')">Revisar Pedido</button></div>
+    <div class="nav"><div class="nav-item active" onclick="window.navigate('order')">PEDIDO</div><div class="nav-item" onclick="window.navigate('history')">HISTÓRICO</div><div class="nav-item" onclick="window.navigate('catalog')">PRODUTOS</div></div>
   </div>
 
   <div class="screen" id="screen-catalog">
-    <div class="header"><div class="header-title">Gerenciar Catálogo</div></div>
+    <div class="header" style="display:flex; justify-content:space-between; align-items:center;">
+        <b>Produtos</b>
+        <button onclick="window.addCategory()" style="background:var(--yellow); border:none; padding:5px 10px; border-radius:5px; font-weight:800; font-size:10px;">+ CATEGORIA</button>
+    </div>
     <div class="body">
       <div style="background:var(--yellow-light); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid var(--yellow);">
-        <h4 style="margin-bottom:10px; color:var(--red);">Novo Produto</h4>
-        <div class="field"><label>Nome</label><input type="text" id="new-name"></div>
+        <div class="field"><label>Novo Produto</label><input type="text" id="new-name"></div>
         <div style="display:flex; gap:10px;">
-          <div class="field" style="flex:1;"><label>Categoria</label><select id="new-cat"><option>Bolos</option><option>Salgados</option><option>Bebidas</option><option>Sucos</option><option>Limpeza</option><option>Embalagens</option></select></div>
-          <div class="field" style="flex:1;"><label>Unidade</label><select id="new-unit"><option>un</option><option>cx</option><option>fardo</option><option>kg</option></select></div>
+          <div class="field" style="flex:1;"><label>Categoria</label><select id="new-cat"></select></div>
+          <div class="field" style="flex:1;"><label>Unidade</label><select id="new-unit"><option>un</option><option>cx</option><option>fardo</option></select></div>
         </div>
-        <button class="btn btn-primary" onclick="window.addProduct()">Adicionar ao Banco</button>
+        <button class="btn btn-primary" onclick="window.addProduct()">Adicionar</button>
       </div>
-      <div id="catalog-list"></div>
+      <div id="catalog-grouped"></div>
     </div>
-    <div class="nav">
-      <div class="nav-item" onclick="window.navigate('order')">Pedido</div>
-      <div class="nav-item" onclick="window.navigate('history')">Histórico</div>
-      <div class="nav-item active" onclick="window.navigate('catalog')">Produtos</div>
-    </div>
+    <div class="nav"><div class="nav-item" onclick="window.navigate('order')">PEDIDO</div><div class="nav-item" onclick="window.navigate('history')">HISTÓRICO</div><div class="nav-item active" onclick="window.navigate('catalog')">PRODUTOS</div></div>
   </div>
 
   <div class="screen" id="screen-review">
-      <div class="header"><div class="header-title">Resumo do Pedido</div></div>
-      <div class="body" id="review-body"></div>
-      <div style="padding:15px; display:flex; gap:10px;">
-          <button class="btn btn-secondary" onclick="window.navigate('order')">Voltar</button>
-          <button class="btn btn-primary" onclick="window.generateOrder()">Finalizar</button>
-      </div>
+    <div class="header"><b>Resumo Final</b></div>
+    <div class="body" id="review-body"></div>
+    <div style="padding:15px; display:flex; gap:10px;"><button class="btn btn-secondary" onclick="window.navigate('order')">Voltar</button><button class="btn btn-primary" onclick="window.generateOrder()">Enviar WhatsApp</button></div>
   </div>
 
   <div class="screen" id="screen-result">
-      <div class="header"><div class="header-title">Mensagem Gerada</div></div>
-      <div class="body">
-          <div id="result-message" style="background:#f4f4f4; padding:15px; border-radius:10px; white-space:pre-wrap; font-family:monospace; margin-bottom:20px;"></div>
-          <button class="btn btn-primary" onclick="window.copyMessage()">Copiar p/ WhatsApp</button>
-          <button class="btn btn-secondary" style="margin-top:10px;" onclick="window.newOrder()">Novo Pedido</button>
-      </div>
+    <div class="header"><b>Pronto!</b></div>
+    <div class="body">
+      <div id="result-message" style="background:#f4f4f4; padding:15px; border-radius:10px; white-space:pre-wrap; font-family:monospace; margin-bottom:15px;"></div>
+      <button class="btn btn-primary" onclick="window.copyMessage()">Copiar Mensagem</button>
+      <button class="btn btn-secondary" style="margin-top:10px;" onclick="window.newOrder()">Novo Pedido</button>
+    </div>
   </div>
 
   <div class="screen" id="screen-history">
-      <div class="header"><div class="header-title">Últimos Pedidos</div></div>
-      <div class="body" id="history-body"></div>
-      <div class="nav">
-          <div class="nav-item" onclick="window.navigate('order')">Pedido</div>
-          <div class="nav-item active" onclick="window.navigate('history')">Histórico</div>
-          <div class="nav-item" onclick="window.navigate('catalog')">Produtos</div>
-      </div>
+    <div class="header"><b>Histórico</b></div>
+    <div class="body" id="history-body"></div>
+    <div class="nav"><div class="nav-item" onclick="window.navigate('order')">PEDIDO</div><div class="nav-item active" onclick="window.navigate('history')">HISTÓRICO</div><div class="nav-item" onclick="window.navigate('catalog')">PRODUTOS</div></div>
   </div>
 
 </div>
 
 <div class="edit-modal-overlay" id="edit-overlay">
   <div class="edit-modal">
-    <h3 style="margin-bottom:15px;">Editar Produto</h3>
-    <div class="field"><label>Nome do Produto</label><input type="text" id="edit-name"></div>
-    <div class="field"><label>Categoria</label><select id="edit-cat"><option>Bolos</option><option>Salgados</option><option>Bebidas</option><option>Sucos</option><option>Limpeza</option><option>Embalagens</option></select></div>
-    <div class="field"><label>Unidade</label><select id="edit-unit"><option>un</option><option>cx</option><option>fardo</option><option>kg</option></select></div>
-    <div style="display:flex; gap:10px; margin-top:20px;">
-      <button class="btn btn-secondary" onclick="window.closeEdit()">Cancelar</button>
-      <button class="btn btn-primary" onclick="window.saveEdit()">Salvar Alteração</button>
-    </div>
+    <h3 style="margin-bottom:15px">Editar Produto</h3>
+    <div class="field"><label>Nome</label><input type="text" id="edit-name"></div>
+    <div class="field"><label>Categoria</label><select id="edit-cat"></select></div>
+    <div class="field"><label>Unidade</label><select id="edit-unit"><option>un</option><option>cx</option><option>fardo</option></select></div>
+    <div style="display:flex; gap:10px; margin-top:15px;"><button class="btn btn-secondary" onclick="window.closeEdit()">Cancelar</button><button class="btn btn-primary" onclick="window.saveEdit()">Salvar</button></div>
   </div>
 </div>
 
@@ -155,119 +145,138 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Estado Global
-let products = [], quantities = {}, user = '', date = '', activeCat = 'Bolos', currentMsg = '', editingId = null;
-const CATS = ['Bolos','Salgados','Bebidas','Sucos','Limpeza','Embalagens'];
+// Estado
+let products = [], categories = [], quantities = {}, user = '', date = '', activeCat = '', editingId = null;
 
-// --- FUNÇÕES GLOBAIS (WINDOW) ---
+// --- FUNÇÕES ---
 
 window.doLogin = () => {
-  user = document.getElementById('login-name').value.trim();
+  user = document.getElementById('login-name').value;
   date = document.getElementById('login-date').value;
-  if(!user || !date) return showToast("Preencha nome e data!");
+  if(!user || !date) return alert("Preencha nome e data");
   window.navigate('order');
 };
 
-window.navigate = (screen) => {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + screen).classList.add('active');
-  if(screen === 'order') renderOrder();
-  if(screen === 'catalog') renderCatalog();
-  if(screen === 'history') renderHistory();
-  if(screen === 'review') renderReview();
+window.navigate = (s) => {
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  document.getElementById('screen-'+s).classList.add('active');
+  if(s==='order') renderOrder();
+  if(s==='catalog') renderCatalog();
+  if(s==='history') renderHistory();
+  if(s==='review') renderReview();
 };
 
-// Pedidos
-window.chg = (id, val) => {
-  const cur = quantities[id] || 0;
-  const next = Math.max(0, cur + val);
-  if(next === 0) delete quantities[id]; else quantities[id] = next;
+// Pedido
+window.chg = (id, v) => {
+  const n = (quantities[id] || 0) + v;
+  if(n <= 0) delete quantities[id]; else quantities[id] = n;
   renderProducts();
 };
 
-window.selCat = (c) => { activeCat = c; renderOrder(); };
+// Catálogo e Categorias
+window.addCategory = async () => {
+    const n = prompt("Nome da nova categoria:");
+    if(n) {
+        await addDoc(collection(db, "categories"), { name: n, created: Date.now() });
+        showToast("Categoria criada!");
+    }
+};
 
-// Catálogo (CRUD)
 window.addProduct = async () => {
-  const name = document.getElementById('new-name').value.trim();
+  const name = document.getElementById('new-name').value;
   const cat = document.getElementById('new-cat').value;
   const unit = document.getElementById('new-unit').value;
-  if(!name) return showToast("Digite o nome do produto");
-  
+  if(!name || !cat) return showToast("Preencha nome e categoria");
   const id = 'p' + Date.now();
   await setDoc(doc(db, "products", id), { id, name, cat, unit });
   document.getElementById('new-name').value = '';
-  showToast("Adicionado!");
+  showToast("Produto Salvo!");
+};
+
+// Menu de 3 Pontos (Ações)
+window.toggleMenu = (e, id) => {
+    e.stopPropagation();
+    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+    document.getElementById('drop-'+id).classList.toggle('active');
+};
+
+window.closeAllDropdowns = () => {
+    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+};
+
+window.duplicateProduct = async (id) => {
+    const p = products.find(x => x.id === id);
+    const newId = 'p' + Date.now();
+    await setDoc(doc(db, "products", newId), { ...p, id: newId, name: p.name + " (Cópia)" });
+    showToast("Produto duplicado!");
+};
+
+window.openEdit = (id) => {
+    const p = products.find(x => x.id === id);
+    editingId = id;
+    document.getElementById('edit-name').value = p.name;
+    document.getElementById('edit-cat').value = p.cat;
+    document.getElementById('edit-unit').value = p.unit;
+    document.getElementById('edit-overlay').classList.add('open');
+};
+
+window.closeEdit = () => { document.getElementById('edit-overlay').classList.remove('open'); };
+
+window.saveEdit = async () => {
+    const name = document.getElementById('edit-name').value;
+    const cat = document.getElementById('edit-cat').value;
+    const unit = document.getElementById('edit-unit').value;
+    await setDoc(doc(db, "products", editingId), { id: editingId, name, cat, unit });
+    window.closeEdit();
+    showToast("Atualizado!");
 };
 
 window.delProduct = async (id) => {
-  if(confirm("Deseja excluir este produto?")) {
-    await deleteDoc(doc(db, "products", id));
-    showToast("Excluído");
-  }
+    if(confirm("Excluir produto?")) await deleteDoc(doc(db, "products", id));
 };
 
-// --- EDIÇÃO (NOVA FUNÇÃO) ---
-window.openEdit = (id) => {
-  const p = products.find(x => x.id === id);
-  if(!p) return;
-  editingId = id;
-  document.getElementById('edit-name').value = p.name;
-  document.getElementById('edit-cat').value = p.cat;
-  document.getElementById('edit-unit').value = p.unit;
-  document.getElementById('edit-overlay').classList.add('open');
-};
-
-window.closeEdit = () => {
-  editingId = null;
-  document.getElementById('edit-overlay').classList.remove('open');
-};
-
-window.saveEdit = async () => {
-  const name = document.getElementById('edit-name').value.trim();
-  const cat = document.getElementById('edit-cat').value;
-  const unit = document.getElementById('edit-unit').value;
-  
-  if(!name) return showToast("O nome não pode ser vazio");
-  
-  await setDoc(doc(db, "products", editingId), { id: editingId, name, cat, unit });
-  window.closeEdit();
-  showToast("Produto atualizado!");
-};
-
-// Finalização
+// WhatsApp
 window.generateOrder = async () => {
-  let msg = `*PEDIDO: SALGADOS DO PONTO*\nColaborador: ${user}\nData: ${date.split('-').reverse().join('/')}\n`;
-  products.forEach(p => {
-    if(quantities[p.id]) msg += `\n- ${p.name}: ${quantities[p.id]} ${p.unit}`;
+  const obs = document.getElementById('order-obs').value;
+  let msg = `*PEDIDO SALGADOS DO PONTO*\n👤 *Colaborador:* ${user}\n📅 *Data:* ${date.split('-').reverse().join('/')}\n`;
+  
+  categories.forEach(c => {
+      const items = products.filter(p => p.cat === c.name && quantities[p.id]);
+      if(items.length > 0) {
+          msg += `\n🔹 *${c.name.toUpperCase()}*\n`;
+          items.forEach(p => msg += `• ${p.name}: ${quantities[p.id]} ${p.unit}\n`);
+      }
   });
-  currentMsg = msg;
+
+  if(obs) msg += `\n📝 *OBSERVAÇÃO:* ${obs}`;
+  
   document.getElementById('result-message').textContent = msg;
   await addDoc(collection(db, "history"), { user, date, msg, timestamp: Date.now() });
   window.navigate('result');
 };
 
 window.copyMessage = () => {
-  navigator.clipboard.writeText(currentMsg);
-  showToast("Copiado para o WhatsApp!");
+    navigator.clipboard.writeText(document.getElementById('result-message').textContent);
+    showToast("Copiado!");
 };
 
-window.newOrder = () => { quantities = {}; window.navigate('order'); };
+window.newOrder = () => { quantities = {}; document.getElementById('order-obs').value = ''; window.navigate('order'); };
 
 // --- RENDERS ---
 
 function renderOrder() {
   document.getElementById('order-info').textContent = `${user} • ${date.split('-').reverse().join('/')}`;
+  if(!activeCat && categories.length) activeCat = categories[0].name;
+  
   const tabs = document.getElementById('order-tabs');
-  tabs.innerHTML = CATS.map(c => `<button onclick="window.selCat('${c}')" style="padding:8px 15px; border-radius:20px; border:1px solid #ddd; background:${activeCat===c?'var(--red)':'#fff'}; color:${activeCat===c?'#fff':'#666'}; font-weight:700; white-space:nowrap;">${c}</button>`).join('');
+  tabs.innerHTML = categories.map(c => `<button onclick="window.activeCat='${c.name}'; renderOrder()" style="padding:8px 15px; border-radius:20px; border:1px solid #ddd; background:${activeCat===c.name?'var(--red)':'#fff'}; color:${activeCat===c.name?'#fff':'#666'}; font-weight:700; white-space:nowrap;">${c.name}</button>`).join('');
   renderProducts();
 }
 
 function renderProducts() {
-  const container = document.getElementById('order-products');
-  const filtered = products.filter(p => p.cat === activeCat);
-  container.innerHTML = filtered.map(p => `
-    <div class="product-row">
+  const cont = document.getElementById('order-products');
+  cont.innerHTML = products.filter(p => p.cat === activeCat).map(p => `
+    <div class="product-item">
       <div><b>${p.name}</b><br><small style="color:#aaa">${p.unit}</small></div>
       <div style="display:flex; align-items:center; gap:12px;">
         <button onclick="window.chg('${p.id}', -1)" style="width:30px; height:30px; border-radius:50%; border:none; background:#eee;">-</button>
@@ -279,55 +288,62 @@ function renderProducts() {
 }
 
 function renderCatalog() {
-  const list = document.getElementById('catalog-list');
-  list.innerHTML = products.map(p => `
-    <div class="cad-row">
-      <div><b>${p.name}</b><br><small>${p.cat} • ${p.unit}</small></div>
-      <div class="cad-actions">
-        <button class="btn-icon" onclick="window.openEdit('${p.id}')" style="background:#e3f2fd; color:#1976d2;">✏️</button>
-        <button class="btn-icon" onclick="window.delProduct('${p.id}')" style="background:#ffebee; color:#c62828;">🗑️</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-async function renderHistory() {
-    const q = query(collection(db, "history"), orderBy("timestamp", "desc"));
-    const snap = await getDocs(q);
-    const histBody = document.getElementById('history-body');
-    histBody.innerHTML = snap.docs.map(d => {
-        const h = d.data();
-        return `<div style="padding:15px; border:1px solid #eee; border-radius:10px; margin-bottom:10px;">
-            <div style="display:flex; justify-content:space-between;"><b>${h.user}</b> <small>${h.date}</small></div>
-            <div style="font-size:12px; color:#666; margin-top:5px;">${h.msg.substring(0, 100)}...</div>
-        </div>`;
+    const cont = document.getElementById('catalog-grouped');
+    cont.innerHTML = categories.map(c => {
+        const pList = products.filter(p => p.cat === c.name);
+        return `
+            <div class="cat-group">
+                <div class="cat-title">${c.name}</div>
+                ${pList.map(p => `
+                    <div class="product-item">
+                        <div><b>${p.name}</b> <small>(${p.unit})</small></div>
+                        <div class="menu-dots" onclick="window.toggleMenu(event, '${p.id}')">⋮
+                            <div class="dropdown" id="drop-${p.id}">
+                                <div class="dropdown-item" onclick="window.openEdit('${p.id}')">✏️ Editar</div>
+                                <div class="dropdown-item" onclick="window.duplicateProduct('${p.id}')">📋 Duplicar</div>
+                                <div class="dropdown-item" style="color:red" onclick="window.delProduct('${p.id}')">🗑️ Excluir</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
     }).join('');
 }
 
 function renderReview() {
     let h = '';
-    products.forEach(p => {
-        if(quantities[p.id]) h += `<div style="padding:10px; border-bottom:1px solid #eee;">${p.name}: <b>${quantities[p.id]} ${p.unit}</b></div>`;
+    categories.forEach(c => {
+        const items = products.filter(p => p.cat === c.name && quantities[p.id]);
+        if(items.length) {
+            h += `<div style="margin-top:10px; color:red; font-weight:800; font-size:12px">${c.name.toUpperCase()}</div>`;
+            items.forEach(p => h += `<div style="padding:8px 0; border-bottom:1px solid #eee">${p.name}: <b>${quantities[p.id]} ${p.unit}</b></div>`);
+        }
     });
-    document.getElementById('review-body').innerHTML = h || 'Nenhum item selecionado.';
+    document.getElementById('review-body').innerHTML = h || 'Nenhum item.';
 }
 
-function showToast(m) {
-  const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+async function renderHistory() {
+    const snap = await getDocs(query(collection(db, "history"), orderBy("timestamp", "desc")));
+    document.getElementById('history-body').innerHTML = snap.docs.map(d => `<div style="padding:10px; border:1px solid #eee; border-radius:8px; margin-bottom:8px;"><b>${d.data().user}</b> - ${d.data().date}</div>`).join('');
 }
 
-// Escuta em tempo real para Produtos
-onSnapshot(collection(db, "products"), (snap) => {
-  products = snap.docs.map(d => d.data());
-  renderProducts();
-  renderCatalog();
+function showToast(m) { const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+
+// Listeners
+onSnapshot(collection(db, "products"), snap => { products = snap.docs.map(d => d.data()); renderProducts(); renderCatalog(); });
+onSnapshot(collection(db, "categories"), snap => { 
+    categories = snap.docs.map(d => d.data()); 
+    const selectAdd = document.getElementById('new-cat');
+    const selectEdit = document.getElementById('edit-cat');
+    const html = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+    selectAdd.innerHTML = html; selectEdit.innerHTML = html;
+    renderOrder(); renderCatalog();
 });
 
-// Init Data
 document.getElementById('login-date').value = new Date().toISOString().split('T')[0];
-
 </script>
 </body>
 </html>
+
 
