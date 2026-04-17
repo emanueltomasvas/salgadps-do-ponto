@@ -20,130 +20,129 @@
   .screen { display: none; flex-direction: column; flex: 1; }
   .screen.active { display: flex; }
   .header { background: var(--red); padding: 18px 20px 16px; flex-shrink: 0; }
-  .header-row { display: flex; justify-content: space-between; align-items: center; }
   .header-title { color: var(--yellow); font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 800; }
   .header-sub { color: rgba(249,216,0,0.6); font-size: 12px; margin-top: 3px; }
-  .header-badge { background: var(--yellow); color: var(--red); border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 800; font-family: 'Nunito', sans-serif; }
   .body { flex: 1; overflow-y: auto; padding: 18px 16px 16px; }
   .nav { background: var(--red); display: flex; justify-content: space-around; padding: 10px 0 14px; flex-shrink: 0; }
-  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 0 14px; }
-  .nav-icon { width: 26px; height: 26px; border-radius: 7px; background: rgba(249,216,0,0.2); display: flex; align-items: center; justify-content: center; }
-  .nav-icon.active { background: var(--yellow); }
-  .nav-icon svg { width: 13px; height: 13px; fill: rgba(249,216,0,0.5); }
-  .nav-icon.active svg { fill: var(--red); }
-  .nav-label { font-size: 10px; color: rgba(249,216,0,0.5); font-weight: 700; font-family: 'Nunito', sans-serif; }
-  .nav-label.active { color: var(--yellow); }
-  .btn { width: 100%; border: none; border-radius: var(--radius-md); padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 0 14px; color: rgba(249,216,0,0.5); font-weight: 700; font-size: 10px; }
+  .nav-item.active { color: var(--yellow); }
+  .btn { width: 100%; border: none; border-radius: var(--radius-md); padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; transition: 0.2s; }
   .btn-primary { background: var(--red); color: var(--yellow); }
   .btn-secondary { background: var(--gray-100); color: var(--red); border: 1px solid var(--gray-200); }
-  .btn-group { display: flex; gap: 10px; }
-  .btn-group .btn { flex: 1; }
   .field { margin-bottom: 14px; }
   .field label { display: block; font-size: 11px; font-weight: 800; color: var(--gray-600); margin-bottom: 6px; text-transform: uppercase; }
-  .field input, .field select { width: 100%; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 14px; }
-  .cat-tabs { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 2px; }
-  .cat-tab { background: var(--gray-100); border-radius: 20px; padding: 7px 14px; font-size: 12px; color: var(--gray-600); border: 1.5px solid var(--gray-200); cursor: pointer; font-weight: 700; }
-  .cat-tab.active { background: var(--red); color: var(--yellow); border-color: var(--red); }
-  .product-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--gray-100); }
-  .pname { font-size: 14px; color: var(--gray-900); font-weight: 600; }
-  .punit { font-size: 11px; color: var(--gray-400); }
-  .counter { display: flex; align-items: center; gap: 10px; }
-  .cbtn { width: 30px; height: 30px; border-radius: 50%; background: var(--red); color: var(--yellow); border: none; font-weight: 800; cursor: pointer; }
-  .cbtn.zero { background: var(--gray-200); color: var(--gray-400); }
-  .cval { font-size: 15px; font-weight: 800; min-width: 22px; text-align: center; }
-  .message-box { background: var(--gray-50); border-radius: var(--radius-md); padding: 16px; font-size: 13px; line-height: 1.8; font-family: monospace; white-space: pre-wrap; margin-bottom: 14px; border: 1px solid var(--gray-200); }
-  .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 13px; opacity: 0; transition: 0.3s; z-index: 999; }
-  .toast.show { opacity: 1; }
-  .login-top { background: var(--red); padding: 52px 24px 36px; text-align: center; }
-  .login-brand { color: var(--yellow); font-size: 30px; font-weight: 900; }
-  .edit-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:100; align-items:center; justify-content:center; }
+  .field input, .field select { width: 100%; border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 14px; outline: none; }
+  .product-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--gray-100); }
+  .cad-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #fdfdfd; border: 1px solid #eee; border-radius: 10px; margin-bottom: 8px; }
+  .cad-actions { display: flex; gap: 8px; }
+  .btn-icon { background: #eee; border: none; padding: 8px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .edit-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center; backdrop-filter: blur(2px); }
   .edit-modal-overlay.open { display:flex; }
-  .edit-modal { background:#fff; padding:20px; border-radius:20px; width:90%; max-width:400px; }
-  .cad-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee; }
-  .cad-actions { display:flex; gap:10px; }
-  .hist-card { background:#f9f9f9; padding:15px; border-radius:12px; margin-bottom:10px; border:1px solid #eee; }
-  .hist-detail { display:none; margin-top:10px; border-top:1px solid #eee; padding-top:10px; }
-  .hist-detail.open { display:block; }
+  .edit-modal { background:#fff; padding:24px; border-radius:20px; width:90%; max-width:400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+  .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 13px; opacity: 0; transition: 0.3s; z-index: 999; pointer-events: none; }
+  .toast.show { opacity: 1; }
 </style>
 </head>
 <body>
-<div class="app" id="app">
+<div class="app">
 
   <div class="screen active" id="screen-login">
-    <div class="login-top">
-      <div class="login-brand">Salgados<br>do Ponto.</div>
+    <div style="background: var(--red); padding: 60px 20px; text-align: center; color: var(--yellow);">
+      <h1 style="font-family: 'Nunito'; font-weight: 900; font-size: 32px;">Salgados do Ponto.</h1>
     </div>
     <div class="body">
-      <div class="field"><label>Seu nome</label><input type="text" id="login-name" placeholder="Ex: Maria..."></div>
-      <div class="field"><label>Data do pedido</label><input type="date" id="login-date"></div>
-      <button class="btn btn-primary" onclick="doLogin()">Iniciar pedido</button>
+      <div class="field"><label>Seu Nome</label><input type="text" id="login-name" placeholder="Quem está contando?"></div>
+      <div class="field"><label>Data</label><input type="date" id="login-date"></div>
+      <button class="btn btn-primary" onclick="window.doLogin()">Acessar Sistema</button>
     </div>
   </div>
 
   <div class="screen" id="screen-order">
-    <div class="header"><div class="header-row"><div><div class="header-title">Pedido</div><div id="order-info" class="header-sub"></div></div><div class="header-badge" id="order-count">0 itens</div></div></div>
+    <div class="header">
+        <div class="header-title">Novo Pedido</div>
+        <div id="order-info" class="header-sub"></div>
+    </div>
     <div class="body">
-      <div class="cat-tabs" id="order-tabs"></div>
-      <div id="order-products" style="margin-top:15px;"></div>
+      <div id="order-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:10px;"></div>
+      <div id="order-products"></div>
     </div>
-    <div class="footer-sticky" style="padding:15px;"><button class="btn btn-primary" onclick="goToReview()">Revisar pedido</button></div>
+    <div style="padding:15px; border-top:1px solid #eee;"><button class="btn btn-primary" onclick="window.navigate('review')">Revisar e Enviar</button></div>
     <div class="nav">
-      <div class="nav-item" onclick="navigate('order')"><div class="nav-icon active"></div><span class="nav-label active">Pedido</span></div>
-      <div class="nav-item" onclick="navigate('history')"><div class="nav-icon"></div><span class="nav-label">Histórico</span></div>
-      <div class="nav-item" onclick="navigate('catalog')"><div class="nav-icon"></div><span class="nav-label">Produtos</span></div>
-    </div>
-  </div>
-
-  <div class="screen" id="screen-review">
-    <div class="header"><div class="header-title">Revisar</div></div>
-    <div class="body" id="review-body"></div>
-    <div class="footer-sticky" style="padding:15px;"><div class="btn-group"><button class="btn btn-secondary" onclick="navigate('order')">Editar</button><button class="btn btn-primary" onclick="generateOrder()">Gerar Mensagem</button></div></div>
-  </div>
-
-  <div class="screen" id="screen-result">
-    <div class="header"><div class="header-title">Pronto!</div></div>
-    <div class="body"><div class="message-box" id="result-message"></div><button class="btn btn-primary" onclick="copyMessage()">Copiar para WhatsApp</button><button class="btn btn-secondary" style="margin-top:10px;" onclick="newOrder()">Novo Pedido</button></div>
-  </div>
-
-  <div class="screen" id="screen-history">
-    <div class="header"><div class="header-title">Histórico</div></div>
-    <div class="body" id="history-body"></div>
-    <div class="nav">
-      <div class="nav-item" onclick="navigate('order')">Pedido</div>
-      <div class="nav-item" onclick="navigate('history')">Histórico</div>
-      <div class="nav-item" onclick="navigate('catalog')">Produtos</div>
+      <div class="nav-item active" onclick="window.navigate('order')">Pedido</div>
+      <div class="nav-item" onclick="window.navigate('history')">Histórico</div>
+      <div class="nav-item" onclick="window.navigate('catalog')">Produtos</div>
     </div>
   </div>
 
   <div class="screen" id="screen-catalog">
-    <div class="header"><div class="header-title">Produtos</div></div>
+    <div class="header"><div class="header-title">Gerenciar Catálogo</div></div>
     <div class="body">
-      <div style="background:#fffbe0; padding:15px; border-radius:12px; margin-bottom:20px;">
+      <div style="background:var(--yellow-light); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid var(--yellow);">
+        <h4 style="margin-bottom:10px; color:var(--red);">Novo Produto</h4>
         <div class="field"><label>Nome</label><input type="text" id="new-name"></div>
-        <div class="field"><label>Cat</label><select id="new-cat"><option>Bolos</option><option>Salgados</option><option>Bebidas</option><option>Sucos</option><option>Limpeza</option><option>Embalagens</option></select></div>
-        <div class="field"><label>Un</label><select id="new-unit"><option>un</option><option>cx</option><option>fardo</option></select></div>
-        <button class="btn btn-primary" onclick="addProduct()">Adicionar</button>
+        <div style="display:flex; gap:10px;">
+          <div class="field" style="flex:1;"><label>Categoria</label><select id="new-cat"><option>Bolos</option><option>Salgados</option><option>Bebidas</option><option>Sucos</option><option>Limpeza</option><option>Embalagens</option></select></div>
+          <div class="field" style="flex:1;"><label>Unidade</label><select id="new-unit"><option>un</option><option>cx</option><option>fardo</option><option>kg</option></select></div>
+        </div>
+        <button class="btn btn-primary" onclick="window.addProduct()">Adicionar ao Banco</button>
       </div>
       <div id="catalog-list"></div>
     </div>
-    <div class="nav"><div class="nav-item" onclick="navigate('order')">Pedido</div><div class="nav-item" onclick="navigate('history')">Histórico</div><div class="nav-item" onclick="navigate('catalog')">Produtos</div></div>
+    <div class="nav">
+      <div class="nav-item" onclick="window.navigate('order')">Pedido</div>
+      <div class="nav-item" onclick="window.navigate('history')">Histórico</div>
+      <div class="nav-item active" onclick="window.navigate('catalog')">Produtos</div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-review">
+      <div class="header"><div class="header-title">Resumo do Pedido</div></div>
+      <div class="body" id="review-body"></div>
+      <div style="padding:15px; display:flex; gap:10px;">
+          <button class="btn btn-secondary" onclick="window.navigate('order')">Voltar</button>
+          <button class="btn btn-primary" onclick="window.generateOrder()">Finalizar</button>
+      </div>
+  </div>
+
+  <div class="screen" id="screen-result">
+      <div class="header"><div class="header-title">Mensagem Gerada</div></div>
+      <div class="body">
+          <div id="result-message" style="background:#f4f4f4; padding:15px; border-radius:10px; white-space:pre-wrap; font-family:monospace; margin-bottom:20px;"></div>
+          <button class="btn btn-primary" onclick="window.copyMessage()">Copiar p/ WhatsApp</button>
+          <button class="btn btn-secondary" style="margin-top:10px;" onclick="window.newOrder()">Novo Pedido</button>
+      </div>
+  </div>
+
+  <div class="screen" id="screen-history">
+      <div class="header"><div class="header-title">Últimos Pedidos</div></div>
+      <div class="body" id="history-body"></div>
+      <div class="nav">
+          <div class="nav-item" onclick="window.navigate('order')">Pedido</div>
+          <div class="nav-item active" onclick="window.navigate('history')">Histórico</div>
+          <div class="nav-item" onclick="window.navigate('catalog')">Produtos</div>
+      </div>
   </div>
 
 </div>
 
 <div class="edit-modal-overlay" id="edit-overlay">
   <div class="edit-modal">
-    <h3>Editar</h3>
-    <div class="field"><input type="text" id="edit-name"></div>
-    <div class="btn-group"><button class="btn btn-secondary" onclick="closeEdit()">Sair</button><button class="btn btn-primary" onclick="saveEdit()">Salvar</button></div>
+    <h3 style="margin-bottom:15px;">Editar Produto</h3>
+    <div class="field"><label>Nome do Produto</label><input type="text" id="edit-name"></div>
+    <div class="field"><label>Categoria</label><select id="edit-cat"><option>Bolos</option><option>Salgados</option><option>Bebidas</option><option>Sucos</option><option>Limpeza</option><option>Embalagens</option></select></div>
+    <div class="field"><label>Unidade</label><select id="edit-unit"><option>un</option><option>cx</option><option>fardo</option><option>kg</option></select></div>
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button class="btn btn-secondary" onclick="window.closeEdit()">Cancelar</button>
+      <button class="btn btn-primary" onclick="window.saveEdit()">Salvar Alteração</button>
+    </div>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
 
 <script type="module">
-// FIREBASE SETUP - Versão Estável 10.7.1
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA-B0kT2YjodcNeIV6-T3QV17wQkDTYqu0",
@@ -153,155 +152,182 @@ const firebaseConfig = {
   appId: "1:340460030406:web:d60b6d0bbb40acdce5cac7"
 };
 
-const fbApp = initializeApp(firebaseConfig);
-const db = getFirestore(fbApp);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-// VARIÁVEIS DE CONTROLE
-let products = [], history = [], quantities = {};
-let user = '', date = '', activeCat = 'Bolos', currentMsg = '', editingId = null;
+// Estado Global
+let products = [], quantities = {}, user = '', date = '', activeCat = 'Bolos', currentMsg = '', editingId = null;
 const CATS = ['Bolos','Salgados','Bebidas','Sucos','Limpeza','Embalagens'];
-const EMO = {Bolos:'🎂',Salgados:' dumpling',Bebidas:'🧃',Sucos:'🥤',Limpeza:'🧹',Embalagens:'📦'};
 
-// EXPOR FUNÇÕES PARA O HTML (WINDOW)
+// --- FUNÇÕES GLOBAIS (WINDOW) ---
+
 window.doLogin = () => {
-  const n = document.getElementById('login-name').value.trim();
-  const d = document.getElementById('login-date').value;
-  if(!n || !d) { showToast('Preencha nome e data'); return; }
-  user = n; date = d; navigate('order');
+  user = document.getElementById('login-name').value.trim();
+  date = document.getElementById('login-date').value;
+  if(!user || !date) return showToast("Preencha nome e data!");
+  window.navigate('order');
 };
 
-window.navigate = (sc) => {
+window.navigate = (screen) => {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + sc).classList.add('active');
-  if(sc === 'order') renderOrder();
-  if(sc === 'history') renderHistory();
-  if(sc === 'catalog') renderCatalog();
+  document.getElementById('screen-' + screen).classList.add('active');
+  if(screen === 'order') renderOrder();
+  if(screen === 'catalog') renderCatalog();
+  if(screen === 'history') renderHistory();
+  if(screen === 'review') renderReview();
 };
 
-window.chg = (id, delta) => {
+// Pedidos
+window.chg = (id, val) => {
   const cur = quantities[id] || 0;
-  const next = Math.max(0, cur + delta);
+  const next = Math.max(0, cur + val);
   if(next === 0) delete quantities[id]; else quantities[id] = next;
-  updateCount(); renderProducts();
+  renderProducts();
 };
 
-window.selCat = (c) => { activeCat = c; renderTabs(); renderProducts(); };
+window.selCat = (c) => { activeCat = c; renderOrder(); };
 
-window.goToReview = () => {
-  if(!Object.keys(quantities).length) return showToast('Selecione itens');
-  renderReview(); navigate('review');
+// Catálogo (CRUD)
+window.addProduct = async () => {
+  const name = document.getElementById('new-name').value.trim();
+  const cat = document.getElementById('new-cat').value;
+  const unit = document.getElementById('new-unit').value;
+  if(!name) return showToast("Digite o nome do produto");
+  
+  const id = 'p' + Date.now();
+  await setDoc(doc(db, "products", id), { id, name, cat, unit });
+  document.getElementById('new-name').value = '';
+  showToast("Adicionado!");
 };
 
-window.generateOrder = async () => {
-  let msg = `*PEDIDO SALGADOS DO PONTO*\nData: ${fmtDate(date)}\nColaborador: ${user}\n`;
-  for(const cat of CATS) {
-    const items = products.filter(p => p.cat === cat && quantities[p.id]);
-    if(!items.length) continue;
-    msg += `\n${EMO[cat]} *${cat.toUpperCase()}*\n`;
-    items.forEach(p => msg += `• ${p.name}: ${quantities[p.id]} ${p.unit}\n`);
+window.delProduct = async (id) => {
+  if(confirm("Deseja excluir este produto?")) {
+    await deleteDoc(doc(db, "products", id));
+    showToast("Excluído");
   }
+};
+
+// --- EDIÇÃO (NOVA FUNÇÃO) ---
+window.openEdit = (id) => {
+  const p = products.find(x => x.id === id);
+  if(!p) return;
+  editingId = id;
+  document.getElementById('edit-name').value = p.name;
+  document.getElementById('edit-cat').value = p.cat;
+  document.getElementById('edit-unit').value = p.unit;
+  document.getElementById('edit-overlay').classList.add('open');
+};
+
+window.closeEdit = () => {
+  editingId = null;
+  document.getElementById('edit-overlay').classList.remove('open');
+};
+
+window.saveEdit = async () => {
+  const name = document.getElementById('edit-name').value.trim();
+  const cat = document.getElementById('edit-cat').value;
+  const unit = document.getElementById('edit-unit').value;
+  
+  if(!name) return showToast("O nome não pode ser vazio");
+  
+  await setDoc(doc(db, "products", editingId), { id: editingId, name, cat, unit });
+  window.closeEdit();
+  showToast("Produto atualizado!");
+};
+
+// Finalização
+window.generateOrder = async () => {
+  let msg = `*PEDIDO: SALGADOS DO PONTO*\nColaborador: ${user}\nData: ${date.split('-').reverse().join('/')}\n`;
+  products.forEach(p => {
+    if(quantities[p.id]) msg += `\n- ${p.name}: ${quantities[p.id]} ${p.unit}`;
+  });
   currentMsg = msg;
-  await addDoc(collection(db, 'history'), { user, date, msg, timestamp: Date.now(), quantities, itemsCount: Object.keys(quantities).length });
   document.getElementById('result-message').textContent = msg;
-  navigate('result');
+  await addDoc(collection(db, "history"), { user, date, msg, timestamp: Date.now() });
+  window.navigate('result');
 };
 
 window.copyMessage = () => {
   navigator.clipboard.writeText(currentMsg);
-  showToast('Copiado!');
+  showToast("Copiado para o WhatsApp!");
 };
 
-window.newOrder = () => { quantities = {}; navigate('order'); };
+window.newOrder = () => { quantities = {}; window.navigate('order'); };
 
-window.addProduct = async () => {
-  const name = document.getElementById('new-name').value;
-  const cat = document.getElementById('new-cat').value;
-  const unit = document.getElementById('new-unit').value;
-  const p = { id: 'p' + Date.now(), name, cat, unit };
-  await setDoc(doc(db, 'products', p.id), p);
-  products.push(p); renderCatalog();
-};
+// --- RENDERS ---
 
-window.delProduct = async (id) => {
-  if(!confirm('Apagar?')) return;
-  await deleteDoc(doc(db, 'products', id));
-  products = products.filter(x => x.id !== id);
-  renderCatalog();
-};
-
-window.togDet = (i) => document.getElementById('hd'+i).classList.toggle('open');
-
-// FUNÇÕES DE RENDERIZAÇÃO
 function renderOrder() {
-  document.getElementById('order-info').textContent = user + ' | ' + fmtDate(date);
-  renderTabs(); renderProducts(); updateCount();
-}
-
-function renderTabs() {
-  document.getElementById('order-tabs').innerHTML = CATS.map(c => 
-    `<div class="cat-tab ${c===activeCat?'active':''}" onclick="selCat('${c}')">${c}</div>`
-  ).join('');
+  document.getElementById('order-info').textContent = `${user} • ${date.split('-').reverse().join('/')}`;
+  const tabs = document.getElementById('order-tabs');
+  tabs.innerHTML = CATS.map(c => `<button onclick="window.selCat('${c}')" style="padding:8px 15px; border-radius:20px; border:1px solid #ddd; background:${activeCat===c?'var(--red)':'#fff'}; color:${activeCat===c?'#fff':'#666'}; font-weight:700; white-space:nowrap;">${c}</button>`).join('');
+  renderProducts();
 }
 
 function renderProducts() {
-  const list = products.filter(p => p.cat === activeCat);
-  document.getElementById('order-products').innerHTML = list.map(p => `
+  const container = document.getElementById('order-products');
+  const filtered = products.filter(p => p.cat === activeCat);
+  container.innerHTML = filtered.map(p => `
     <div class="product-row">
-      <div><div class="pname">${p.name}</div><div class="punit">${p.unit}</div></div>
-      <div class="counter">
-        <button class="cbtn zero" onclick="chg('${p.id}',-1)">-</button>
-        <span class="cval">${quantities[p.id] || 0}</span>
-        <button class="cbtn" onclick="chg('${p.id}',1)">+</button>
+      <div><b>${p.name}</b><br><small style="color:#aaa">${p.unit}</small></div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button onclick="window.chg('${p.id}', -1)" style="width:30px; height:30px; border-radius:50%; border:none; background:#eee;">-</button>
+        <span style="font-weight:800; min-width:20px; text-align:center;">${quantities[p.id] || 0}</span>
+        <button onclick="window.chg('${p.id}', 1)" style="width:30px; height:30px; border-radius:50%; border:none; background:var(--red); color:#fff;">+</button>
       </div>
     </div>
   `).join('');
 }
 
-function updateCount() {
-  const total = Object.values(quantities).reduce((a,b) => a+b, 0);
-  document.getElementById('order-count').textContent = total + ' itens';
-}
-
-function renderReview() {
-  let h = '';
-  Object.keys(quantities).forEach(id => {
-    const p = products.find(x => x.id === id);
-    if(p) h += `<div style="padding:10px; border-bottom:1px solid #eee">${p.name}: <b>${quantities[id]} ${p.unit}</b></div>`;
-  });
-  document.getElementById('review-body').innerHTML = h;
+function renderCatalog() {
+  const list = document.getElementById('catalog-list');
+  list.innerHTML = products.map(p => `
+    <div class="cad-row">
+      <div><b>${p.name}</b><br><small>${p.cat} • ${p.unit}</small></div>
+      <div class="cad-actions">
+        <button class="btn-icon" onclick="window.openEdit('${p.id}')" style="background:#e3f2fd; color:#1976d2;">✏️</button>
+        <button class="btn-icon" onclick="window.delProduct('${p.id}')" style="background:#ffebee; color:#c62828;">🗑️</button>
+      </div>
+    </div>
+  `).join('');
 }
 
 async function renderHistory() {
-  const snap = await getDocs(query(collection(db, 'history'), orderBy('timestamp', 'desc')));
-  const hist = snap.docs.map(d => d.data());
-  document.getElementById('history-body').innerHTML = hist.map((h, i) => `
-    <div class="hist-card" onclick="togDet(${i})">
-      <b>${h.user}</b> - ${fmtDate(h.date)} (${h.itemsCount} itens)
-      <div class="hist-detail" id="hd${i}">${h.msg.replace(/\n/g, '<br>')}</div>
-    </div>
-  `).join('');
+    const q = query(collection(db, "history"), orderBy("timestamp", "desc"));
+    const snap = await getDocs(q);
+    const histBody = document.getElementById('history-body');
+    histBody.innerHTML = snap.docs.map(d => {
+        const h = d.data();
+        return `<div style="padding:15px; border:1px solid #eee; border-radius:10px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between;"><b>${h.user}</b> <small>${h.date}</small></div>
+            <div style="font-size:12px; color:#666; margin-top:5px;">${h.msg.substring(0, 100)}...</div>
+        </div>`;
+    }).join('');
 }
 
-function renderCatalog() {
-  document.getElementById('catalog-list').innerHTML = products.map(p => `
-    <div class="cad-row">
-      <div>${p.name} (${p.cat})</div>
-      <button class="btn btn-secondary" style="width:auto; padding:5px 10px;" onclick="delProduct('${p.id}')">X</button>
-    </div>
-  `).join('');
+function renderReview() {
+    let h = '';
+    products.forEach(p => {
+        if(quantities[p.id]) h += `<div style="padding:10px; border-bottom:1px solid #eee;">${p.name}: <b>${quantities[p.id]} ${p.unit}</b></div>`;
+    });
+    document.getElementById('review-body').innerHTML = h || 'Nenhum item selecionado.';
 }
 
-function showToast(m) { const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
-function fmtDate(s) { if(!s) return ''; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; }
+function showToast(m) {
+  const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
 
-// INIT
-async function init() {
-  const d = new Date();
-  document.getElementById('login-date').value = d.toISOString().split('T')[0];
-  const snap = await getDocs(collection(db, 'products'));
+// Escuta em tempo real para Produtos
+onSnapshot(collection(db, "products"), (snap) => {
   products = snap.docs.map(d => d.data());
-}
-init();
+  renderProducts();
+  renderCatalog();
+});
+
+// Init Data
+document.getElementById('login-date').value = new Date().toISOString().split('T')[0];
+
 </script>
 </body>
 </html>
+
