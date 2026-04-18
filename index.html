@@ -24,31 +24,45 @@
   .nav-item.active { color: var(--yellow); }
   .btn { width: 100%; border: none; border-radius: var(--radius-md); padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Nunito'; }
   .btn-primary { background: var(--red); color: var(--yellow); }
+  .btn-secondary { background: var(--gray-100); color: var(--red); border: 1px solid var(--gray-200); }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 11px; font-weight: 800; color: var(--gray-600); margin-bottom: 4px; text-transform: uppercase; }
+  .field input, .field select, .field textarea { width: 100%; border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 12px; font-size: 14px; font-family: inherit; }
   
+  /* Estilo Categorias no Catálogo */
   .cat-group { margin-bottom: 25px; }
-  .cat-header { display: flex; justify-content: space-between; align-items: center; background: #f8f8f8; padding: 8px 12px; border-radius: 6px; border-left: 4px solid var(--red); margin-bottom: 10px; }
+  .cat-header { display: flex; justify-content: space-between; align-items: center; background: #f8f8f8; padding: 6px 12px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid var(--red); }
   .cat-title { font-size: 13px; font-weight: 800; color: var(--red); }
   
-  .product-item { padding: 12px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-  .order-controls { display: flex; gap: 5px; }
-  .order-btn { background: #eee; border: none; border-radius: 4px; padding: 4px 8px; font-size: 10px; cursor: pointer; }
+  .product-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; position: relative; }
+  
+  /* Controles de Ordem */
+  .order-controls { display: flex; gap: 4px; align-items: center; }
+  .btn-order { background: #eee; border: none; border-radius: 4px; width: 24px; height: 24px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .btn-order:hover { background: #ddd; }
 
-  .flavor-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #fafafa; border-radius: 6px; margin-top: 5px; font-size: 13px; }
-  .qty-btn { width: 28px; height: 28px; border-radius: 50%; border: none; background: #eee; font-weight: bold; cursor: pointer; }
-  .qty-btn.plus { background: var(--red); color: white; }
+  /* Menu 3 Pontos */
+  .menu-dots { cursor: pointer; padding: 5px 10px; font-size: 20px; color: var(--gray-400); }
+  .dropdown { display: none; position: absolute; right: 0; top: 40px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border-radius: 8px; z-index: 10; width: 140px; overflow: hidden; }
+  .dropdown.active { display: block; }
+  .dropdown-item { padding: 12px; font-size: 13px; font-weight: 600; color: var(--gray-900); border-bottom: 1px solid #f4f4f4; cursor: pointer; }
+  .dropdown-item:last-child { border: none; }
 
+  .edit-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center; }
+  .edit-modal-overlay.open { display:flex; }
+  .edit-modal { background:#fff; padding:20px; border-radius:15px; width:90%; max-width:400px; }
   .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 12px; opacity: 0; transition: 0.3s; z-index: 999; }
   .toast.show { opacity: 1; }
 </style>
 </head>
-<body onclick="window.closeAllMenus()">
+<body onclick="window.closeAllDropdowns(event)">
 <div class="app">
 
   <div class="screen active" id="screen-login">
     <div style="background: var(--red); padding: 50px 20px; text-align: center;"><h1 style="color:var(--yellow); font-family:'Nunito'; font-weight:900;">Salgados do Ponto.</h1></div>
     <div class="body">
-      <div class="field"><label style="font-size:11px; font-weight:800; color:#666">NOME</label><input type="text" id="login-name" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ddd; margin-bottom:15px;"></div>
-      <div class="field"><label style="font-size:11px; font-weight:800; color:#666">DATA</label><input type="date" id="login-date" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ddd; margin-bottom:15px;"></div>
+      <div class="field"><label>Nome</label><input type="text" id="login-name"></div>
+      <div class="field"><label>Data</label><input type="date" id="login-date"></div>
       <button class="btn btn-primary" onclick="window.doLogin()">Entrar</button>
     </div>
   </div>
@@ -58,46 +72,65 @@
     <div class="body">
       <div id="order-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:12px;"></div>
       <div id="order-products"></div>
-      <textarea id="order-obs" rows="2" placeholder="Observações do pedido..." style="width:100%; margin-top:15px; padding:10px; border-radius:8px; border:1px solid #ddd;"></textarea>
+      <div class="field" style="margin-top:20px;">
+        <label>Observação do Pedido</label>
+        <textarea id="order-obs" rows="2" placeholder="Ex: Avisar quando sair..."></textarea>
+      </div>
     </div>
     <div style="padding:15px;"><button class="btn btn-primary" onclick="window.navigate('review')">Revisar Pedido</button></div>
-    <div class="nav"><div class="nav-item active" onclick="window.navigate('order')">PEDIDO</div><div class="nav-item" onclick="window.navigate('catalog')">PRODUTOS</div></div>
+    <div class="nav"><div class="nav-item active" onclick="window.navigate('order')">PEDIDO</div><div class="nav-item" onclick="window.navigate('history')">HISTÓRICO</div><div class="nav-item" onclick="window.navigate('catalog')">PRODUTOS</div></div>
   </div>
 
   <div class="screen" id="screen-catalog">
     <div class="header" style="display:flex; justify-content:space-between; align-items:center;">
-        <b>Organizar Catálogo</b>
+        <b>Gerenciar Produtos</b>
         <button onclick="window.addCategory()" style="background:var(--yellow); border:none; padding:5px 10px; border-radius:5px; font-weight:800; font-size:10px;">+ CATEGORIA</button>
     </div>
     <div class="body">
       <div style="background:var(--yellow-light); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid var(--yellow);">
-        <input type="text" id="new-name" placeholder="Nome do Produto" style="width:100%; padding:10px; margin-bottom:10px; border-radius:6px; border:1px solid #ddd;">
-        <div style="display:flex; gap:10px; margin-bottom:10px;">
-          <select id="new-cat" style="flex:1; padding:10px; border-radius:6px; border:1px solid #ddd;"></select>
-          <select id="new-unit" style="flex:1; padding:10px; border-radius:6px; border:1px solid #ddd;"><option>unidade</option><option>caixa</option><option>fardo</option></select>
+        <div class="field"><label>Novo Produto</label><input type="text" id="new-name"></div>
+        <div style="display:flex; gap:10px;">
+          <div class="field" style="flex:1;"><label>Categoria</label><select id="new-cat"></select></div>
+          <div class="field" style="flex:1;"><label>Unidade</label><select id="new-unit"><option>un</option><option>cx</option><option>fardo</option></select></div>
         </div>
-        <button class="btn btn-primary" onclick="window.addProduct()">Adicionar Produto</button>
+        <button class="btn btn-primary" onclick="window.addProduct()">Adicionar ao Banco</button>
       </div>
       <div id="catalog-grouped"></div>
     </div>
-    <div class="nav"><div class="nav-item" onclick="window.navigate('order')">PEDIDO</div><div class="nav-item active" onclick="window.navigate('catalog')">PRODUTOS</div></div>
+    <div class="nav"><div class="nav-item" onclick="window.navigate('order')">PEDIDO</div><div class="nav-item" onclick="window.navigate('history')">HISTÓRICO</div><div class="nav-item active" onclick="window.navigate('catalog')">PRODUTOS</div></div>
   </div>
 
   <div class="screen" id="screen-review">
-    <div class="header"><b>Resumo</b></div>
+    <div class="header"><b>Resumo Final</b></div>
     <div class="body" id="review-body"></div>
-    <div style="padding:15px; display:flex; gap:10px;"><button class="btn" style="background:#eee" onclick="window.navigate('order')">Voltar</button><button class="btn btn-primary" onclick="window.generateOrder()">Finalizar</button></div>
+    <div style="padding:15px; display:flex; gap:10px;"><button class="btn btn-secondary" onclick="window.navigate('order')">Voltar</button><button class="btn btn-primary" onclick="window.generateOrder()">Enviar WhatsApp</button></div>
   </div>
 
   <div class="screen" id="screen-result">
-    <div class="header"><b>Mensagem</b></div>
+    <div class="header"><b>Pronto!</b></div>
     <div class="body">
-      <div id="result-message" style="background:#f4f4f4; padding:15px; border-radius:10px; white-space:pre-wrap; font-family:monospace; font-size:13px;"></div>
-      <button class="btn btn-primary" style="margin-top:20px;" onclick="window.copyMessage()">Copiar WhatsApp</button>
-      <button class="btn" style="background:#eee; margin-top:10px; width:100%" onclick="window.newOrder()">Novo Pedido</button>
+      <div id="result-message" style="background:#f4f4f4; padding:15px; border-radius:10px; white-space:pre-wrap; font-family:monospace; margin-bottom:15px;"></div>
+      <button class="btn btn-primary" onclick="window.copyMessage()">Copiar Mensagem</button>
+      <button class="btn btn-secondary" style="margin-top:10px;" onclick="window.newOrder()">Novo Pedido</button>
     </div>
   </div>
 
+  <div class="screen" id="screen-history">
+    <div class="header"><b>Histórico</b></div>
+    <div class="body" id="history-body"></div>
+    <div class="nav"><div class="nav-item" onclick="window.navigate('order')">PEDIDO</div><div class="nav-item active" onclick="window.navigate('history')">HISTÓRICO</div><div class="nav-item" onclick="window.navigate('catalog')">PRODUTOS</div></div>
+  </div>
+
+</div>
+
+<div class="edit-modal-overlay" id="edit-overlay">
+  <div class="edit-modal">
+    <h3 style="margin-bottom:15px">Editar Produto</h3>
+    <div class="field"><label>Nome</label><input type="text" id="edit-name"></div>
+    <div class="field"><label>Categoria</label><select id="edit-cat"></select></div>
+    <div class="field"><label>Unidade</label><select id="edit-unit"><option>un</option><option>cx</option><option>fardo</option></select></div>
+    <div style="display:flex; gap:10px; margin-top:15px;"><button class="btn btn-secondary" onclick="window.closeEdit()">Cancelar</button><button class="btn btn-primary" onclick="window.saveEdit()">Salvar</button></div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -117,13 +150,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let products = [], categories = [], quantities = {}, user = '', date = '', activeCat = '';
+let products = [], categories = [], quantities = {}, user = '', date = '', activeCat = '', editingId = null;
 
-// --- FUNÇÕES DE LOGIN E NAVEGAÇÃO ---
+// --- FUNÇÕES CORE ---
 window.doLogin = () => {
   user = document.getElementById('login-name').value;
   date = document.getElementById('login-date').value;
-  if(!user || !date) return alert("Preencha os campos!");
+  if(!user || !date) return alert("Preencha nome e data");
   window.navigate('order');
 };
 
@@ -132,152 +165,226 @@ window.navigate = (s) => {
   document.getElementById('screen-'+s).classList.add('active');
   if(s==='order') renderOrder();
   if(s==='catalog') renderCatalog();
-  if(s==='review') renderReview();
+  if(s==='history') renderHistory();
 };
 
-// --- FUNÇÕES DO CATÁLOGO (CATEGORIAS E PRODUTOS) ---
+// --- CATEGORIAS ---
 window.addCategory = async () => {
     const n = prompt("Nome da nova categoria:");
-    if(n) await addDoc(collection(db, "categories"), { name: n, order: categories.length });
-};
-
-window.addProduct = async () => {
-    const name = document.getElementById('new-name').value;
-    const cat = document.getElementById('new-cat').value;
-    const unit = document.getElementById('new-unit').value;
-    if(!name) return;
-    const catProds = products.filter(p => p.cat === cat);
-    await addDoc(collection(db, "products"), { name, cat, unit, order: catProds.length });
-    document.getElementById('new-name').value = '';
-    showToast("Produto Adicionado!");
-};
-
-window.deleteCategory = async (id, name) => {
-    if(confirm(`Excluir categoria "${name}" e todos os seus produtos?`)) {
-        await deleteDoc(doc(db, "categories", id));
-        products.filter(p => p.cat === name).forEach(async (p) => {
-            await deleteDoc(doc(db, "products", p.firebaseId));
-        });
+    if(n) {
+        await addDoc(collection(db, "categories"), { name: n, order: categories.length, created: Date.now() });
+        showToast("Categoria criada!");
     }
 };
 
-window.deleteProduct = async (id) => {
-    if(confirm("Excluir produto?")) await deleteDoc(doc(db, "products", id));
+window.delCategory = async (id, name) => {
+    if(confirm(`Excluir a categoria "${name}"? Os produtos vinculados a ela não serão apagados, mas ficarão sem categoria.`)) {
+        await deleteDoc(doc(db, "categories", id));
+        showToast("Categoria removida!");
+    }
 };
 
-// --- FUNÇÕES DE REORDENAÇÃO ---
 window.moveCat = async (index, direction) => {
     const newIndex = index + direction;
     if(newIndex < 0 || newIndex >= categories.length) return;
-    const item1 = categories[index];
-    const item2 = categories[newIndex];
-    await updateDoc(doc(db, "categories", item1.firebaseId), { order: newIndex });
-    await updateDoc(doc(db, "categories", item2.firebaseId), { order: index });
+    const cat1 = categories[index];
+    const cat2 = categories[newIndex];
+    await updateDoc(doc(db, "categories", cat1.fbId), { order: newIndex });
+    await updateDoc(doc(db, "categories", cat2.fbId), { order: index });
 };
 
-window.moveProd = async (prodId, direction, catName) => {
+// --- PRODUTOS ---
+window.addProduct = async () => {
+  const name = document.getElementById('new-name').value;
+  const cat = document.getElementById('new-cat').value;
+  const unit = document.getElementById('new-unit').value;
+  if(!name) return showToast("Digite o nome");
+  const id = 'p' + Date.now();
+  const catProds = products.filter(p => p.cat === cat);
+  await setDoc(doc(db, "products", id), { id, name, cat, unit, order: catProds.length });
+  document.getElementById('new-name').value = '';
+  showToast("Produto Salvo!");
+};
+
+window.moveProd = async (prodId, catName, direction) => {
     const catProds = products.filter(p => p.cat === catName).sort((a,b) => a.order - b.order);
-    const index = catProds.findIndex(p => p.firebaseId === prodId);
+    const index = catProds.findIndex(p => p.id === prodId);
     const newIndex = index + direction;
     if(newIndex < 0 || newIndex >= catProds.length) return;
-    const item1 = catProds[index];
-    const item2 = catProds[newIndex];
-    await updateDoc(doc(db, "products", item1.firebaseId), { order: item2.order });
-    await updateDoc(doc(db, "products", item2.firebaseId), { order: item1.order });
+    const p1 = catProds[index];
+    const p2 = catProds[newIndex];
+    await updateDoc(doc(db, "products", p1.id), { order: p2.order || newIndex });
+    await updateDoc(doc(db, "products", p2.id), { order: p1.order || index });
 };
 
-// --- RENDERIZAÇÃO ---
+// --- AÇÕES DO MENU (EDITAR/DUPLICAR/EXCLUIR) ---
+window.toggleMenu = (e, id) => {
+    e.stopPropagation();
+    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+    document.getElementById('drop-'+id).classList.toggle('active');
+};
+
+window.closeAllDropdowns = () => {
+    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+};
+
+window.duplicateProduct = async (id) => {
+    const p = products.find(x => x.id === id);
+    const newId = 'p' + Date.now();
+    await setDoc(doc(db, "products", newId), { ...p, id: newId, name: p.name + " (Cópia)" });
+    showToast("Produto duplicado!");
+};
+
+window.openEdit = (id) => {
+    const p = products.find(x => x.id === id);
+    editingId = id;
+    document.getElementById('edit-name').value = p.name;
+    document.getElementById('edit-cat').value = p.cat;
+    document.getElementById('edit-unit').value = p.unit;
+    document.getElementById('edit-overlay').classList.add('open');
+};
+
+window.closeEdit = () => document.getElementById('edit-overlay').classList.remove('open');
+
+window.saveEdit = async () => {
+    const name = document.getElementById('edit-name').value;
+    const cat = document.getElementById('edit-cat').value;
+    const unit = document.getElementById('edit-unit').value;
+    await updateDoc(doc(db, "products", editingId), { name, cat, unit });
+    window.closeEdit();
+    showToast("Atualizado!");
+};
+
+window.delProduct = async (id) => {
+    if(confirm("Excluir produto?")) await deleteDoc(doc(db, "products", id));
+};
+
+window.chg = (id, v) => {
+  const n = (quantities[id] || 0) + v;
+  if(n <= 0) delete quantities[id]; else quantities[id] = n;
+  renderProducts();
+};
+
+// --- RENDERS ---
 function renderOrder() {
   document.getElementById('order-info').textContent = `${user} • ${date.split('-').reverse().join('/')}`;
   if(!activeCat && categories.length) activeCat = categories[0].name;
-  document.getElementById('order-tabs').innerHTML = categories.map(c => `<button onclick="window.activeCat='${c.name}'; renderOrder()" style="padding:8px 15px; border-radius:20px; border:1px solid #ddd; background:${activeCat===c.name?'var(--red)':'#fff'}; color:${activeCat===c.name?'#fff':'#666'}; font-weight:700; white-space:nowrap; margin-right:5px;">${c.name}</button>`).join('');
   
+  const tabs = document.getElementById('order-tabs');
+  tabs.innerHTML = categories.map(c => `<button onclick="window.activeCat='${c.name}'; renderOrder()" style="padding:8px 15px; border-radius:20px; border:1px solid #ddd; background:${activeCat===c.name?'var(--red)':'#fff'}; color:${activeCat===c.name?'#fff':'#666'}; font-weight:700; white-space:nowrap;">${c.name}</button>`).join('');
+  renderProducts();
+}
+
+function renderProducts() {
   const cont = document.getElementById('order-products');
-  cont.innerHTML = products.filter(p => p.cat === activeCat).sort((a,b) => a.order - b.order).map(p => `
+  cont.innerHTML = products.filter(p => p.cat === activeCat).sort((a,b) => (a.order||0) - (b.order||0)).map(p => `
     <div class="product-item">
-      <div><b>${p.name}</b><br><small>${p.unit}</small></div>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <button class="qty-btn" onclick="window.chg('${p.firebaseId}',-1)">-</button>
-        <b>${quantities[p.firebaseId]||0}</b>
-        <button class="qty-btn plus" onclick="window.chg('${p.firebaseId}',1)">+</button>
+      <div><b>${p.name}</b><br><small style="color:#aaa">${p.unit}</small></div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button onclick="window.chg('${p.id}', -1)" style="width:30px; height:30px; border-radius:50%; border:none; background:#eee;">-</button>
+        <span style="font-weight:800; min-width:20px; text-align:center;">${quantities[p.id] || 0}</span>
+        <button onclick="window.chg('${p.id}', 1)" style="width:30px; height:30px; border-radius:50%; border:none; background:var(--red); color:#fff;">+</button>
       </div>
     </div>`).join('');
 }
 
-window.chg = (id, v) => {
-    const n = (quantities[id] || 0) + v;
-    if(n <= 0) delete quantities[id]; else quantities[id] = n;
-    renderOrder();
-};
-
 function renderCatalog() {
     const cont = document.getElementById('catalog-grouped');
-    const select = document.getElementById('new-cat');
-    select.innerHTML = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-    
     cont.innerHTML = categories.map((c, idx) => {
-        const pList = products.filter(p => p.cat === c.name).sort((a,b) => a.order - b.order);
+        const pList = products.filter(p => p.cat === c.name).sort((a,b) => (a.order||0) - (b.order||0));
         return `
             <div class="cat-group">
                 <div class="cat-header">
                     <span class="cat-title">${c.name}</span>
                     <div class="order-controls">
-                        <button class="order-btn" onclick="window.moveCat(${idx}, -1)">▲</button>
-                        <button class="order-btn" onclick="window.moveCat(${idx}, 1)">▼</button>
-                        <button class="order-btn" style="color:red" onclick="window.deleteCategory('${c.firebaseId}','${c.name}')">🗑️</button>
+                        <button class="btn-order" onclick="window.moveCat(${idx}, -1)">▲</button>
+                        <button class="btn-order" onclick="window.moveCat(${idx}, 1)">▼</button>
+                        <button class="btn-order" style="color:red" onclick="window.delCategory('${c.fbId}', '${c.name}')">🗑️</button>
                     </div>
                 </div>
-                ${pList.map((p, pIdx) => `
-                    <div class="product-item" style="padding:8px 10px; font-size:13px">
-                        <span>${p.name}</span>
-                        <div class="order-controls">
-                            <button class="order-btn" onclick="window.moveProd('${p.firebaseId}', -1, '${c.name}')">▲</button>
-                            <button class="order-btn" onclick="window.moveProd('${p.firebaseId}', 1, '${c.name}')">▼</button>
-                            <button class="order-btn" style="color:red" onclick="window.deleteProduct('${p.firebaseId}')">✕</button>
+                ${pList.map(p => `
+                    <div class="product-item">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div class="order-controls" style="flex-direction:column; gap:2px;">
+                                <button class="btn-order" style="height:14px; width:20px; font-size:8px;" onclick="window.moveProd('${p.id}', '${c.name}', -1)">▲</button>
+                                <button class="btn-order" style="height:14px; width:20px; font-size:8px;" onclick="window.moveProd('${p.id}', '${c.name}', 1)">▼</button>
+                            </div>
+                            <b>${p.name}</b> <small>(${p.unit})</small>
+                        </div>
+                        <div class="menu-dots" onclick="window.toggleMenu(event, '${p.id}')">⋮
+                            <div class="dropdown" id="drop-${p.id}">
+                                <div class="dropdown-item" onclick="window.openEdit('${p.id}')">✏️ Editar</div>
+                                <div class="dropdown-item" onclick="window.duplicateProduct('${p.id}')">📋 Duplicar</div>
+                                <div class="dropdown-item" style="color:red" onclick="window.delProduct('${p.id}')">🗑️ Excluir</div>
+                            </div>
                         </div>
                     </div>`).join('')}
             </div>`;
     }).join('');
 }
 
+// Funções de Resumo, WhatsApp e Histórico mantidas como no seu código base...
 function renderReview() {
     let h = '';
     categories.forEach(c => {
-        let catH = "";
-        products.filter(p => p.cat === c.name).forEach(p => {
-            if(quantities[p.firebaseId]) catH += `<div>${p.name}: <b>${quantities[p.firebaseId]} ${p.unit}</b></div>`;
-        });
-        if(catH) h += `<div style="margin-top:15px; border-bottom:1px solid #eee; padding-bottom:5px;"><b style="color:red">${c.name}</b>${catH}</div>`;
+        const items = products.filter(p => p.cat === c.name && quantities[p.id]);
+        if(items.length) {
+            h += `<div style="margin-top:10px; color:red; font-weight:800; font-size:12px">${c.name.toUpperCase()}</div>`;
+            items.forEach(p => h += `<div style="padding:8px 0; border-bottom:1px solid #eee">${p.name}: <b>${quantities[p.id]} ${p.unit}</b></div>`);
+        }
     });
-    document.getElementById('review-body').innerHTML = h || 'Vazio';
+    document.getElementById('review-body').innerHTML = h || 'Nenhum item.';
 }
 
-window.generateOrder = () => {
-  let msg = `*PEDIDO SALGADOS DO PONTO*\n👤 ${user}\n📅 ${date.split('-').reverse().join('/')}\n`;
-  categories.forEach(c => {
-      let ct = "";
-      products.filter(p => p.cat === c.name).forEach(p => {
-          if(quantities[p.firebaseId]) ct += `• ${p.name}: ${quantities[p.firebaseId]} ${p.unit}\n`;
-      });
-      if(ct) msg += `\n🔹 *${c.name}*\n${ct}`;
-  });
+window.generateOrder = async () => {
   const obs = document.getElementById('order-obs').value;
-  if(obs) msg += `\n📝 *OBS:* ${obs}`;
+  let msg = `*PEDIDO SALGADOS DO PONTO*\n👤 *Colaborador:* ${user}\n📅 *Data:* ${date.split('-').reverse().join('/')}\n`;
+  categories.forEach(c => {
+      const items = products.filter(p => p.cat === c.name && quantities[p.id]);
+      if(items.length > 0) {
+          msg += `\n🔹 *${c.name.toUpperCase()}*\n`;
+          items.forEach(p => msg += `• ${p.name}: ${quantities[p.id]} ${p.unit}\n`);
+      }
+  });
+  if(obs) msg += `\n📝 *OBSERVAÇÃO:* ${obs}`;
   document.getElementById('result-message').textContent = msg;
+  await addDoc(collection(db, "history"), { user, date, msg, timestamp: Date.now() });
   window.navigate('result');
 };
 
 window.copyMessage = () => {
     navigator.clipboard.writeText(document.getElementById('result-message').textContent);
-    showToast("Pedido Copiado!");
+    showToast("Copiado!");
 };
 
 window.newOrder = () => { quantities = {}; document.getElementById('order-obs').value = ''; window.navigate('order'); };
 
+async function renderHistory() {
+    const snap = await getDocs(query(collection(db, "history"), orderBy("timestamp", "desc")));
+    document.getElementById('history-body').innerHTML = snap.docs.map(d => `<div style="padding:10px; border:1px solid #eee; border-radius:8px; margin-bottom:8px;"><b>${d.data().user}</b> - ${d.data().date}</div>`).join('');
+}
+
 function showToast(m) { const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
 
-// --- SINCRONIZAÇÃO COM FIREBASE ---
-onSnapshot(query(collection(db
+// Listeners Firebase
+onSnapshot(collection(db, "products"), snap => { 
+    products = snap.docs.map(d => ({ ...d.data(), fbId: d.id })); 
+    renderProducts(); renderCatalog(); 
+});
+
+onSnapshot(query(collection(db, "categories"), orderBy("order")), snap => { 
+    categories = snap.docs.map(d => ({ ...d.data(), fbId: d.id })); 
+    const html = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+    document.getElementById('new-cat').innerHTML = html; 
+    document.getElementById('edit-cat').innerHTML = html;
+    renderOrder(); renderCatalog();
+});
+
+document.getElementById('login-date').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
+
 
 
 
