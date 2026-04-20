@@ -29,23 +29,23 @@
   .field label { display: block; font-size: 11px; font-weight: 800; color: var(--gray-600); margin-bottom: 4px; text-transform: uppercase; }
   .field input, .field select, .field textarea { width: 100%; border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 12px; font-size: 14px; font-family: inherit; }
   
-  /* Estilos de Categoria no Pedido e Catálogo */
-  .order-cat-title { background: var(--gray-100); color: var(--red); padding: 8px 12px; font-weight: 900; font-size: 12px; text-transform: uppercase; margin-top: 20px; border-radius: 6px; border-left: 4px solid var(--red); }
-  .order-cat-title:first-child { margin-top: 0; }
+  /* Títulos de Categoria no Pedido (Rolagem Única) */
+  .order-cat-header { background: #f8f8f8; color: var(--red); padding: 10px 15px; font-weight: 900; font-size: 13px; text-transform: uppercase; margin-top: 25px; border-radius: 8px; border-left: 5px solid var(--red); }
+  .order-cat-header:first-child { margin-top: 0; }
 
-  .cat-header { display: flex; justify-content: space-between; align-items: center; background: #f8f8f8; padding: 6px 12px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid var(--red); }
-  .cat-title { font-size: 13px; font-weight: 800; color: var(--red); }
-  
   .product-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; position: relative; }
   
+  /* Controles de Ordem */
   .order-controls { display: flex; gap: 4px; align-items: center; }
   .btn-order { background: #eee; border: none; border-radius: 4px; width: 24px; height: 24px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .btn-order:hover { background: #ddd; }
 
+  /* Menu 3 Pontos */
   .menu-dots { cursor: pointer; padding: 5px 10px; font-size: 20px; color: var(--gray-400); }
   .dropdown { display: none; position: absolute; right: 0; top: 40px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border-radius: 8px; z-index: 10; width: 140px; overflow: hidden; }
   .dropdown.active { display: block; }
   .dropdown-item { padding: 12px; font-size: 13px; font-weight: 600; color: var(--gray-900); border-bottom: 1px solid #f4f4f4; cursor: pointer; }
-
+  
   .edit-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center; }
   .edit-modal-overlay.open { display:flex; }
   .edit-modal { background:#fff; padding:20px; border-radius:15px; width:90%; max-width:400px; }
@@ -68,9 +68,9 @@
   <div class="screen" id="screen-order">
     <div class="header"><div id="order-info" style="font-weight:800;"></div></div>
     <div class="body">
-      <div id="order-content"></div>
+      <div id="order-list-scroller"></div>
       
-      <div class="field" style="margin-top:30px; border-top: 2px solid var(--gray-100); padding-top: 20px;">
+      <div class="field" style="margin-top:25px; padding-top:15px; border-top:1px solid #eee;">
         <label>Observação do Pedido</label>
         <textarea id="order-obs" rows="2" placeholder="Ex: Avisar quando sair..."></textarea>
       </div>
@@ -138,4 +138,36 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc, onSnapshot, query, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
+  apiKey: "AIzaSyA-B0kT2YjodcNeIV6-T3QV17wQkDTYqu0",
+  authDomain: "salgados-do-ponto-51c80.firebaseapp.com",
+  projectId: "salgados-do-ponto-51c80",
+  storageBucket: "salgados-do-ponto-51c80.firebasestorage.app",
+  appId: "1:340460030406:web:d60b6d0bbb40acdce5cac7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let products = [], categories = [], quantities = {}, user = '', date = '', editingId = null;
+
+// --- FUNÇÕES CORE ---
+window.doLogin = () => {
+  user = document.getElementById('login-name').value;
+  date = document.getElementById('login-date').value;
+  if(!user || !date) return alert("Preencha nome e data");
+  window.navigate('order');
+};
+
+window.navigate = (s) => {
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  document.getElementById('screen-'+s).classList.add('active');
+  if(s==='order') renderOrder();
+  if(s==='catalog') renderCatalog();
+  if(s==='history') renderHistory();
+  if(s==='review') renderReview();
+};
+
+// --- CATEGORIAS ---
+window.addCategory = async () => {
+    const n = prompt("Nome da nova categoria:");
 
