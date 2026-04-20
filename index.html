@@ -29,19 +29,16 @@
   .field label { display: block; font-size: 11px; font-weight: 800; color: var(--gray-600); margin-bottom: 4px; text-transform: uppercase; }
   .field input, .field select, .field textarea { width: 100%; border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 12px; font-size: 14px; font-family: inherit; }
   
-  /* Estilo Categorias no Catálogo */
   .cat-group { margin-bottom: 25px; }
   .cat-header { display: flex; justify-content: space-between; align-items: center; background: #f8f8f8; padding: 6px 12px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid var(--red); }
   .cat-title { font-size: 13px; font-weight: 800; color: var(--red); }
   
   .product-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; position: relative; }
   
-  /* Controles de Ordem */
   .order-controls { display: flex; gap: 4px; align-items: center; }
   .btn-order { background: #eee; border: none; border-radius: 4px; width: 24px; height: 24px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .btn-order:hover { background: #ddd; }
 
-  /* Menu 3 Pontos */
   .menu-dots { cursor: pointer; padding: 5px 10px; font-size: 20px; color: var(--gray-400); }
   .dropdown { display: none; position: absolute; right: 0; top: 40px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border-radius: 8px; z-index: 10; width: 140px; overflow: hidden; }
   .dropdown.active { display: block; }
@@ -178,7 +175,7 @@ window.addCategory = async () => {
 };
 
 window.delCategory = async (id, name) => {
-    if(confirm(`Excluir a categoria "${name}"? Os produtos vinculados a ela não serão apagados, mas ficarão sem categoria.`)) {
+    if(confirm(`Excluir a categoria "${name}"? Os produtos vinculados a ela não serão apagados.`)) {
         await deleteDoc(doc(db, "categories", id));
         showToast("Categoria removida!");
     }
@@ -198,55 +195,72 @@ window.addProduct = async () => {
   const name = document.getElementById('new-name').value;
   const cat = document.getElementById('new-cat').value;
   const unit = document.getElementById('new-unit').value;
-  if(!name) return showToast("Digite o nome");
-  const id = 'p' + Date.now();
+  if(!name || !cat) return showToast("Digite o nome e selecione a categoria");
+  
   const catProds = products.filter(p => p.cat === cat);
-  await setDoc(doc(db, "products", id), { id, name, cat, unit, order: catProds.length });
+  await addDoc(collection(db, "products"), { 
+    name, cat, unit, order: catProds.length 
+  });
+  
   document.getElementById('new-name').value = '';
   showToast("Produto Salvo!");
 };
 
-window.moveProd = async (prodId, catName, direction) => {
+window.moveProd = async (fbId, catName, direction) => {
     const catProds = products.filter(p => p.cat === catName).sort((a,b) => a.order - b.order);
-    const index = catProds.findIndex(p => p.id === prodId);
+    const index = catProds.findIndex(p => p.fbId === fbId);
     const newIndex = index + direction;
+    
     if(newIndex < 0 || newIndex >= catProds.length) return;
+    
     const p1 = catProds[index];
     const p2 = catProds[newIndex];
-    await updateDoc(doc(db, "products", p1.id), { order: p2.order || newIndex });
-    await updateDoc(doc(db, "products", p2.id), { order: p1.order || index });
+    
+    await updateDoc(doc(db, "products", p1.fbId), { order: newIndex });
+    await updateDoc(doc(db, "products", p2.fbId), { order: index });
 };
 
-// --- AÇÕES DO MENU (EDITAR/DUPLICAR/EXCLUIR) ---
+// --- AÇÕES DO MENU ---
 window.toggleMenu = (e, id) => {
     e.stopPropagation();
+    const dropdown = document.getElementById('drop-'+id);
+    const wasActive = dropdown.classList.contains('active');
     document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
-    document.getElementById('drop-'+id).classList.toggle('active');
+    if(!wasActive) dropdown.classList.add('active');
 };
 
-window.closeAllDropdowns = () => {
-    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+window.closeAllDropdowns = (e) => {
+    if (!e.target.closest('.menu-dots')) {
+        document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+    }
 };
 
-window.duplicateProduct = async (id) => {
-    const p = products.find(x => x.id === id);
-    const newId = 'p' + Date.now();
-    await setDoc(doc(db, "products", newId), { ...p, id: newId, name: p.name + " (Cópia)" });
+window.duplicateProduct = async (fbId) => {
+    const p = products.find(x => x.fbId === fbId);
+    await addDoc(collection(db, "products"), { 
+        ...p, 
+        name: p.name + " (Cópia)",
+        order: (p.order || 0) + 1 
+    });
     showToast("Produto duplicado!");
 };
 
-window.openEdit = (id) => {
-    const p = products.find(x => x.id === id);
-    editingId = id;
+window.openEdit = (fbId) => {
+    const p = products.find(x => x.fbId === fbId);
+    editingId = fbId;
     document.getElementById('edit-name').value = p.name;
     document.getElementById('edit-cat').value = p.cat;
     document.getElementById('edit-unit').value = p.unit;
     document.getElementById('edit-overlay').classList.add('open');
 };
 
-window.closeEdit = () => document.getElementById('edit-overlay').classList.remove('open');
+window.closeEdit = () => {
+    editingId = null;
+    document.getElementById('edit-overlay').classList.remove('open');
+};
 
 window.saveEdit = async () => {
+    if(!editingId) return;
     const name = document.getElementById('edit-name').value;
     const cat = document.getElementById('edit-cat').value;
     const unit = document.getElementById('edit-unit').value;
@@ -255,13 +269,16 @@ window.saveEdit = async () => {
     showToast("Atualizado!");
 };
 
-window.delProduct = async (id) => {
-    if(confirm("Excluir produto?")) await deleteDoc(doc(db, "products", id));
+window.delProduct = async (fbId) => {
+    if(confirm("Excluir produto definitivamente?")) {
+        await deleteDoc(doc(db, "products", fbId));
+        showToast("Produto excluído");
+    }
 };
 
-window.chg = (id, v) => {
-  const n = (quantities[id] || 0) + v;
-  if(n <= 0) delete quantities[id]; else quantities[id] = n;
+window.chg = (fbId, v) => {
+  const n = (quantities[fbId] || 0) + v;
+  if(n <= 0) delete quantities[fbId]; else quantities[fbId] = n;
   renderProducts();
 };
 
@@ -271,19 +288,27 @@ function renderOrder() {
   if(!activeCat && categories.length) activeCat = categories[0].name;
   
   const tabs = document.getElementById('order-tabs');
-  tabs.innerHTML = categories.map(c => `<button onclick="window.activeCat='${c.name}'; renderOrder()" style="padding:8px 15px; border-radius:20px; border:1px solid #ddd; background:${activeCat===c.name?'var(--red)':'#fff'}; color:${activeCat===c.name?'#fff':'#666'}; font-weight:700; white-space:nowrap;">${c.name}</button>`).join('');
+  tabs.innerHTML = categories.map(c => `
+    <button onclick="window.activeCat='${c.name}'; renderOrder()" 
+      style="padding:8px 15px; border-radius:20px; border:1px solid #ddd; 
+      background:${activeCat===c.name?'var(--red)':'#fff'}; 
+      color:${activeCat===c.name?'#fff':'#666'}; font-weight:700; white-space:nowrap;">
+      ${c.name}
+    </button>`).join('');
   renderProducts();
 }
 
 function renderProducts() {
   const cont = document.getElementById('order-products');
-  cont.innerHTML = products.filter(p => p.cat === activeCat).sort((a,b) => (a.order||0) - (b.order||0)).map(p => `
+  const filtered = products.filter(p => p.cat === activeCat).sort((a,b) => (a.order||0) - (b.order||0));
+  
+  cont.innerHTML = filtered.map(p => `
     <div class="product-item">
       <div><b>${p.name}</b><br><small style="color:#aaa">${p.unit}</small></div>
       <div style="display:flex; align-items:center; gap:12px;">
-        <button onclick="window.chg('${p.id}', -1)" style="width:30px; height:30px; border-radius:50%; border:none; background:#eee;">-</button>
-        <span style="font-weight:800; min-width:20px; text-align:center;">${quantities[p.id] || 0}</span>
-        <button onclick="window.chg('${p.id}', 1)" style="width:30px; height:30px; border-radius:50%; border:none; background:var(--red); color:#fff;">+</button>
+        <button onclick="window.chg('${p.fbId}', -1)" style="width:30px; height:30px; border-radius:50%; border:none; background:#eee;">-</button>
+        <span style="font-weight:800; min-width:20px; text-align:center;">${quantities[p.fbId] || 0}</span>
+        <button onclick="window.chg('${p.fbId}', 1)" style="width:30px; height:30px; border-radius:50%; border:none; background:var(--red); color:#fff;">+</button>
       </div>
     </div>`).join('');
 }
@@ -306,16 +331,16 @@ function renderCatalog() {
                     <div class="product-item">
                         <div style="display:flex; align-items:center; gap:10px;">
                             <div class="order-controls" style="flex-direction:column; gap:2px;">
-                                <button class="btn-order" style="height:14px; width:20px; font-size:8px;" onclick="window.moveProd('${p.id}', '${c.name}', -1)">▲</button>
-                                <button class="btn-order" style="height:14px; width:20px; font-size:8px;" onclick="window.moveProd('${p.id}', '${c.name}', 1)">▼</button>
+                                <button class="btn-order" style="height:14px; width:20px; font-size:8px;" onclick="window.moveProd('${p.fbId}', '${c.name}', -1)">▲</button>
+                                <button class="btn-order" style="height:14px; width:20px; font-size:8px;" onclick="window.moveProd('${p.fbId}', '${c.name}', 1)">▼</button>
                             </div>
                             <b>${p.name}</b> <small>(${p.unit})</small>
                         </div>
-                        <div class="menu-dots" onclick="window.toggleMenu(event, '${p.id}')">⋮
-                            <div class="dropdown" id="drop-${p.id}">
-                                <div class="dropdown-item" onclick="window.openEdit('${p.id}')">✏️ Editar</div>
-                                <div class="dropdown-item" onclick="window.duplicateProduct('${p.id}')">📋 Duplicar</div>
-                                <div class="dropdown-item" style="color:red" onclick="window.delProduct('${p.id}')">🗑️ Excluir</div>
+                        <div class="menu-dots" onclick="window.toggleMenu(event, '${p.fbId}')">⋮
+                            <div class="dropdown" id="drop-${p.fbId}">
+                                <div class="dropdown-item" onclick="window.openEdit('${p.fbId}')">✏️ Editar</div>
+                                <div class="dropdown-item" onclick="window.duplicateProduct('${p.fbId}')">📋 Duplicar</div>
+                                <div class="dropdown-item" style="color:red" onclick="window.delProduct('${p.fbId}')">🗑️ Excluir</div>
                             </div>
                         </div>
                     </div>`).join('')}
@@ -323,68 +348,20 @@ function renderCatalog() {
     }).join('');
 }
 
-// Funções de Resumo, WhatsApp e Histórico mantidas como no seu código base...
 function renderReview() {
     let h = '';
     categories.forEach(c => {
-        const items = products.filter(p => p.cat === c.name && quantities[p.id]);
+        const items = products.filter(p => p.cat === c.name && quantities[p.fbId]);
         if(items.length) {
             h += `<div style="margin-top:10px; color:red; font-weight:800; font-size:12px">${c.name.toUpperCase()}</div>`;
-            items.forEach(p => h += `<div style="padding:8px 0; border-bottom:1px solid #eee">${p.name}: <b>${quantities[p.id]} ${p.unit}</b></div>`);
+            items.forEach(p => h += `<div style="padding:8px 0; border-bottom:1px solid #eee">${p.name}: <b>${quantities[p.fbId]} ${p.unit}</b></div>`);
         }
     });
-    document.getElementById('review-body').innerHTML = h || 'Nenhum item.';
+    document.getElementById('review-body').innerHTML = h || 'Nenhum item selecionado.';
 }
 
 window.generateOrder = async () => {
   const obs = document.getElementById('order-obs').value;
-  let msg = `*PEDIDO SALGADOS DO PONTO*\n👤 *Colaborador:* ${user}\n📅 *Data:* ${date.split('-').reverse().join('/')}\n`;
-  categories.forEach(c => {
-      const items = products.filter(p => p.cat === c.name && quantities[p.id]);
-      if(items.length > 0) {
-          msg += `\n🔹 *${c.name.toUpperCase()}*\n`;
-          items.forEach(p => msg += `• ${p.name}: ${quantities[p.id]} ${p.unit}\n`);
-      }
-  });
-  if(obs) msg += `\n📝 *OBSERVAÇÃO:* ${obs}`;
-  document.getElementById('result-message').textContent = msg;
-  await addDoc(collection(db, "history"), { user, date, msg, timestamp: Date.now() });
-  window.navigate('result');
-};
-
-window.copyMessage = () => {
-    navigator.clipboard.writeText(document.getElementById('result-message').textContent);
-    showToast("Copiado!");
-};
-
-window.newOrder = () => { quantities = {}; document.getElementById('order-obs').value = ''; window.navigate('order'); };
-
-async function renderHistory() {
-    const snap = await getDocs(query(collection(db, "history"), orderBy("timestamp", "desc")));
-    document.getElementById('history-body').innerHTML = snap.docs.map(d => `<div style="padding:10px; border:1px solid #eee; border-radius:8px; margin-bottom:8px;"><b>${d.data().user}</b> - ${d.data().date}</div>`).join('');
-}
-
-function showToast(m) { const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
-
-// Listeners Firebase
-onSnapshot(collection(db, "products"), snap => { 
-    products = snap.docs.map(d => ({ ...d.data(), fbId: d.id })); 
-    renderProducts(); renderCatalog(); 
-});
-
-onSnapshot(query(collection(db, "categories"), orderBy("order")), snap => { 
-    categories = snap.docs.map(d => ({ ...d.data(), fbId: d.id })); 
-    const html = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-    document.getElementById('new-cat').innerHTML = html; 
-    document.getElementById('edit-cat').innerHTML = html;
-    renderOrder(); renderCatalog();
-});
-
-document.getElementById('login-date').value = new Date().toISOString().split('T')[0];
-</script>
-</body>
-</html>
-
-
+  let msg = `*
 
 
