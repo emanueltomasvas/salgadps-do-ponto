@@ -29,7 +29,10 @@
   .field label { display: block; font-size: 11px; font-weight: 800; color: var(--gray-600); margin-bottom: 4px; text-transform: uppercase; }
   .field input, .field select, .field textarea { width: 100%; border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 12px; font-size: 14px; font-family: inherit; }
   
-  .cat-group { margin-bottom: 25px; }
+  /* Estilos de Categoria no Pedido e Catálogo */
+  .order-cat-title { background: var(--gray-100); color: var(--red); padding: 8px 12px; font-weight: 900; font-size: 12px; text-transform: uppercase; margin-top: 20px; border-radius: 6px; border-left: 4px solid var(--red); }
+  .order-cat-title:first-child { margin-top: 0; }
+
   .cat-header { display: flex; justify-content: space-between; align-items: center; background: #f8f8f8; padding: 6px 12px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid var(--red); }
   .cat-title { font-size: 13px; font-weight: 800; color: var(--red); }
   
@@ -37,13 +40,11 @@
   
   .order-controls { display: flex; gap: 4px; align-items: center; }
   .btn-order { background: #eee; border: none; border-radius: 4px; width: 24px; height: 24px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  .btn-order:hover { background: #ddd; }
 
   .menu-dots { cursor: pointer; padding: 5px 10px; font-size: 20px; color: var(--gray-400); }
   .dropdown { display: none; position: absolute; right: 0; top: 40px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border-radius: 8px; z-index: 10; width: 140px; overflow: hidden; }
   .dropdown.active { display: block; }
   .dropdown-item { padding: 12px; font-size: 13px; font-weight: 600; color: var(--gray-900); border-bottom: 1px solid #f4f4f4; cursor: pointer; }
-  .dropdown-item:last-child { border: none; }
 
   .edit-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center; }
   .edit-modal-overlay.open { display:flex; }
@@ -67,9 +68,9 @@
   <div class="screen" id="screen-order">
     <div class="header"><div id="order-info" style="font-weight:800;"></div></div>
     <div class="body">
-      <div id="order-tabs" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:12px;"></div>
-      <div id="order-products"></div>
-      <div class="field" style="margin-top:20px;">
+      <div id="order-content"></div>
+      
+      <div class="field" style="margin-top:30px; border-top: 2px solid var(--gray-100); padding-top: 20px;">
         <label>Observação do Pedido</label>
         <textarea id="order-obs" rows="2" placeholder="Ex: Avisar quando sair..."></textarea>
       </div>
@@ -137,231 +138,4 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc, onSnapshot, query, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA-B0kT2YjodcNeIV6-T3QV17wQkDTYqu0",
-  authDomain: "salgados-do-ponto-51c80.firebaseapp.com",
-  projectId: "salgados-do-ponto-51c80",
-  storageBucket: "salgados-do-ponto-51c80.firebasestorage.app",
-  appId: "1:340460030406:web:d60b6d0bbb40acdce5cac7"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-let products = [], categories = [], quantities = {}, user = '', date = '', activeCat = '', editingId = null;
-
-// --- FUNÇÕES CORE ---
-window.doLogin = () => {
-  user = document.getElementById('login-name').value;
-  date = document.getElementById('login-date').value;
-  if(!user || !date) return alert("Preencha nome e data");
-  window.navigate('order');
-};
-
-window.navigate = (s) => {
-  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-  document.getElementById('screen-'+s).classList.add('active');
-  if(s==='order') renderOrder();
-  if(s==='catalog') renderCatalog();
-  if(s==='history') renderHistory();
-};
-
-// --- CATEGORIAS ---
-window.addCategory = async () => {
-    const n = prompt("Nome da nova categoria:");
-    if(n) {
-        await addDoc(collection(db, "categories"), { name: n, order: categories.length, created: Date.now() });
-        showToast("Categoria criada!");
-    }
-};
-
-window.delCategory = async (id, name) => {
-    if(confirm(`Excluir a categoria "${name}"? Os produtos vinculados a ela não serão apagados.`)) {
-        await deleteDoc(doc(db, "categories", id));
-        showToast("Categoria removida!");
-    }
-};
-
-window.moveCat = async (index, direction) => {
-    const newIndex = index + direction;
-    if(newIndex < 0 || newIndex >= categories.length) return;
-    const cat1 = categories[index];
-    const cat2 = categories[newIndex];
-    await updateDoc(doc(db, "categories", cat1.fbId), { order: newIndex });
-    await updateDoc(doc(db, "categories", cat2.fbId), { order: index });
-};
-
-// --- PRODUTOS ---
-window.addProduct = async () => {
-  const name = document.getElementById('new-name').value;
-  const cat = document.getElementById('new-cat').value;
-  const unit = document.getElementById('new-unit').value;
-  if(!name || !cat) return showToast("Digite o nome e selecione a categoria");
-  
-  const catProds = products.filter(p => p.cat === cat);
-  await addDoc(collection(db, "products"), { 
-    name, cat, unit, order: catProds.length 
-  });
-  
-  document.getElementById('new-name').value = '';
-  showToast("Produto Salvo!");
-};
-
-window.moveProd = async (fbId, catName, direction) => {
-    const catProds = products.filter(p => p.cat === catName).sort((a,b) => a.order - b.order);
-    const index = catProds.findIndex(p => p.fbId === fbId);
-    const newIndex = index + direction;
-    
-    if(newIndex < 0 || newIndex >= catProds.length) return;
-    
-    const p1 = catProds[index];
-    const p2 = catProds[newIndex];
-    
-    await updateDoc(doc(db, "products", p1.fbId), { order: newIndex });
-    await updateDoc(doc(db, "products", p2.fbId), { order: index });
-};
-
-// --- AÇÕES DO MENU ---
-window.toggleMenu = (e, id) => {
-    e.stopPropagation();
-    const dropdown = document.getElementById('drop-'+id);
-    const wasActive = dropdown.classList.contains('active');
-    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
-    if(!wasActive) dropdown.classList.add('active');
-};
-
-window.closeAllDropdowns = (e) => {
-    if (!e.target.closest('.menu-dots')) {
-        document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
-    }
-};
-
-window.duplicateProduct = async (fbId) => {
-    const p = products.find(x => x.fbId === fbId);
-    await addDoc(collection(db, "products"), { 
-        ...p, 
-        name: p.name + " (Cópia)",
-        order: (p.order || 0) + 1 
-    });
-    showToast("Produto duplicado!");
-};
-
-window.openEdit = (fbId) => {
-    const p = products.find(x => x.fbId === fbId);
-    editingId = fbId;
-    document.getElementById('edit-name').value = p.name;
-    document.getElementById('edit-cat').value = p.cat;
-    document.getElementById('edit-unit').value = p.unit;
-    document.getElementById('edit-overlay').classList.add('open');
-};
-
-window.closeEdit = () => {
-    editingId = null;
-    document.getElementById('edit-overlay').classList.remove('open');
-};
-
-window.saveEdit = async () => {
-    if(!editingId) return;
-    const name = document.getElementById('edit-name').value;
-    const cat = document.getElementById('edit-cat').value;
-    const unit = document.getElementById('edit-unit').value;
-    await updateDoc(doc(db, "products", editingId), { name, cat, unit });
-    window.closeEdit();
-    showToast("Atualizado!");
-};
-
-window.delProduct = async (fbId) => {
-    if(confirm("Excluir produto definitivamente?")) {
-        await deleteDoc(doc(db, "products", fbId));
-        showToast("Produto excluído");
-    }
-};
-
-window.chg = (fbId, v) => {
-  const n = (quantities[fbId] || 0) + v;
-  if(n <= 0) delete quantities[fbId]; else quantities[fbId] = n;
-  renderProducts();
-};
-
-// --- RENDERS ---
-function renderOrder() {
-  document.getElementById('order-info').textContent = `${user} • ${date.split('-').reverse().join('/')}`;
-  if(!activeCat && categories.length) activeCat = categories[0].name;
-  
-  const tabs = document.getElementById('order-tabs');
-  tabs.innerHTML = categories.map(c => `
-    <button onclick="window.activeCat='${c.name}'; renderOrder()" 
-      style="padding:8px 15px; border-radius:20px; border:1px solid #ddd; 
-      background:${activeCat===c.name?'var(--red)':'#fff'}; 
-      color:${activeCat===c.name?'#fff':'#666'}; font-weight:700; white-space:nowrap;">
-      ${c.name}
-    </button>`).join('');
-  renderProducts();
-}
-
-function renderProducts() {
-  const cont = document.getElementById('order-products');
-  const filtered = products.filter(p => p.cat === activeCat).sort((a,b) => (a.order||0) - (b.order||0));
-  
-  cont.innerHTML = filtered.map(p => `
-    <div class="product-item">
-      <div><b>${p.name}</b><br><small style="color:#aaa">${p.unit}</small></div>
-      <div style="display:flex; align-items:center; gap:12px;">
-        <button onclick="window.chg('${p.fbId}', -1)" style="width:30px; height:30px; border-radius:50%; border:none; background:#eee;">-</button>
-        <span style="font-weight:800; min-width:20px; text-align:center;">${quantities[p.fbId] || 0}</span>
-        <button onclick="window.chg('${p.fbId}', 1)" style="width:30px; height:30px; border-radius:50%; border:none; background:var(--red); color:#fff;">+</button>
-      </div>
-    </div>`).join('');
-}
-
-function renderCatalog() {
-    const cont = document.getElementById('catalog-grouped');
-    cont.innerHTML = categories.map((c, idx) => {
-        const pList = products.filter(p => p.cat === c.name).sort((a,b) => (a.order||0) - (b.order||0));
-        return `
-            <div class="cat-group">
-                <div class="cat-header">
-                    <span class="cat-title">${c.name}</span>
-                    <div class="order-controls">
-                        <button class="btn-order" onclick="window.moveCat(${idx}, -1)">▲</button>
-                        <button class="btn-order" onclick="window.moveCat(${idx}, 1)">▼</button>
-                        <button class="btn-order" style="color:red" onclick="window.delCategory('${c.fbId}', '${c.name}')">🗑️</button>
-                    </div>
-                </div>
-                ${pList.map(p => `
-                    <div class="product-item">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <div class="order-controls" style="flex-direction:column; gap:2px;">
-                                <button class="btn-order" style="height:14px; width:20px; font-size:8px;" onclick="window.moveProd('${p.fbId}', '${c.name}', -1)">▲</button>
-                                <button class="btn-order" style="height:14px; width:20px; font-size:8px;" onclick="window.moveProd('${p.fbId}', '${c.name}', 1)">▼</button>
-                            </div>
-                            <b>${p.name}</b> <small>(${p.unit})</small>
-                        </div>
-                        <div class="menu-dots" onclick="window.toggleMenu(event, '${p.fbId}')">⋮
-                            <div class="dropdown" id="drop-${p.fbId}">
-                                <div class="dropdown-item" onclick="window.openEdit('${p.fbId}')">✏️ Editar</div>
-                                <div class="dropdown-item" onclick="window.duplicateProduct('${p.fbId}')">📋 Duplicar</div>
-                                <div class="dropdown-item" style="color:red" onclick="window.delProduct('${p.fbId}')">🗑️ Excluir</div>
-                            </div>
-                        </div>
-                    </div>`).join('')}
-            </div>`;
-    }).join('');
-}
-
-function renderReview() {
-    let h = '';
-    categories.forEach(c => {
-        const items = products.filter(p => p.cat === c.name && quantities[p.fbId]);
-        if(items.length) {
-            h += `<div style="margin-top:10px; color:red; font-weight:800; font-size:12px">${c.name.toUpperCase()}</div>`;
-            items.forEach(p => h += `<div style="padding:8px 0; border-bottom:1px solid #eee">${p.name}: <b>${quantities[p.fbId]} ${p.unit}</b></div>`);
-        }
-    });
-    document.getElementById('review-body').innerHTML = h || 'Nenhum item selecionado.';
-}
-
-window.generateOrder = async () => {
-  const obs = document.getElementById('order-obs').value;
-  let msg = `*
-
 
