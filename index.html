@@ -29,10 +29,15 @@
   .field label { display: block; font-size: 11px; font-weight: 800; color: var(--gray-600); margin-bottom: 4px; text-transform: uppercase; }
   .field input, .field select, .field textarea { width: 100%; border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 12px; font-size: 14px; font-family: inherit; }
   
-  /* Títulos de Categoria no Pedido (Rolagem Única) */
-  .order-cat-header { background: #f8f8f8; color: var(--red); padding: 10px 15px; font-weight: 900; font-size: 13px; text-transform: uppercase; margin-top: 25px; border-radius: 8px; border-left: 5px solid var(--red); }
-  .order-cat-header:first-child { margin-top: 0; }
+  /* Estilo Categorias no Catálogo e Pedido */
+  .cat-group { margin-bottom: 25px; }
+  .cat-header { display: flex; justify-content: space-between; align-items: center; background: #f8f8f8; padding: 6px 12px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid var(--red); }
+  
+  /* Título da categoria na aba PEDIDO */
+  .order-cat-label { background: var(--gray-100); color: var(--red); padding: 8px 12px; font-weight: 900; font-size: 12px; text-transform: uppercase; border-left: 4px solid var(--red); border-radius: 4px; margin-top: 15px; margin-bottom: 5px; }
+  .order-cat-label:first-child { margin-top: 0; }
 
+  .cat-title { font-size: 13px; font-weight: 800; color: var(--red); }
   .product-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; position: relative; }
   
   /* Controles de Ordem */
@@ -45,7 +50,7 @@
   .dropdown { display: none; position: absolute; right: 0; top: 40px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border-radius: 8px; z-index: 10; width: 140px; overflow: hidden; }
   .dropdown.active { display: block; }
   .dropdown-item { padding: 12px; font-size: 13px; font-weight: 600; color: var(--gray-900); border-bottom: 1px solid #f4f4f4; cursor: pointer; }
-  
+
   .edit-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:100; align-items:center; justify-content:center; }
   .edit-modal-overlay.open { display:flex; }
   .edit-modal { background:#fff; padding:20px; border-radius:15px; width:90%; max-width:400px; }
@@ -68,9 +73,9 @@
   <div class="screen" id="screen-order">
     <div class="header"><div id="order-info" style="font-weight:800;"></div></div>
     <div class="body">
-      <div id="order-list-scroller"></div>
+      <div id="order-products-scroller"></div>
       
-      <div class="field" style="margin-top:25px; padding-top:15px; border-top:1px solid #eee;">
+      <div class="field" style="margin-top:30px; padding-top:20px; border-top: 1px solid #eee;">
         <label>Observação do Pedido</label>
         <textarea id="order-obs" rows="2" placeholder="Ex: Avisar quando sair..."></textarea>
       </div>
@@ -164,10 +169,228 @@ window.navigate = (s) => {
   if(s==='order') renderOrder();
   if(s==='catalog') renderCatalog();
   if(s==='history') renderHistory();
-  if(s==='review') renderReview();
 };
 
 // --- CATEGORIAS ---
 window.addCategory = async () => {
     const n = prompt("Nome da nova categoria:");
+    if(n) {
+        await addDoc(collection(db, "categories"), { name: n, order: categories.length, created: Date.now() });
+        showToast("Categoria criada!");
+    }
+};
 
+window.delCategory = async (id, name) => {
+    if(confirm(`Excluir a categoria "${name}"?`)) {
+        await deleteDoc(doc(db, "categories", id));
+        showToast("Categoria removida!");
+    }
+};
+
+window.moveCat = async (index, direction) => {
+    const newIndex = index + direction;
+    if(newIndex < 0 || newIndex >= categories.length) return;
+    const cat1 = categories[index];
+    const cat2 = categories[newIndex];
+    await updateDoc(doc(db, "categories", cat1.fbId), { order: newIndex });
+    await updateDoc(doc(db, "categories", cat2.fbId), { order: index });
+};
+
+// --- PRODUTOS ---
+window.addProduct = async () => {
+  const name = document.getElementById('new-name').value;
+  const cat = document.getElementById('new-cat').value;
+  const unit = document.getElementById('new-unit').value;
+  if(!name) return showToast("Digite o nome");
+  const id = 'p' + Date.now();
+  const catProds = products.filter(p => p.cat === cat);
+  await setDoc(doc(db, "products", id), { id, name, cat, unit, order: catProds.length });
+  document.getElementById('new-name').value = '';
+  showToast("Produto Salvo!");
+};
+
+window.moveProd = async (prodId, catName, direction) => {
+    const catProds = products.filter(p => p.cat === catName).sort((a,b) => a.order - b.order);
+    const index = catProds.findIndex(p => p.id === prodId);
+    const newIndex = index + direction;
+    if(newIndex < 0 || newIndex >= catProds.length) return;
+    const p1 = catProds[index];
+    const p2 = catProds[newIndex];
+    await updateDoc(doc(db, "products", p1.id), { order: p2.order || newIndex });
+    await updateDoc(doc(db, "products", p2.id), { order: p1.order || index });
+};
+
+window.toggleMenu = (e, id) => {
+    e.stopPropagation();
+    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+    document.getElementById('drop-'+id).classList.toggle('active');
+};
+
+window.closeAllDropdowns = () => {
+    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+};
+
+window.duplicateProduct = async (id) => {
+    const p = products.find(x => x.id === id);
+    const newId = 'p' + Date.now();
+    await setDoc(doc(db, "products", newId), { ...p, id: newId, name: p.name + " (Cópia)" });
+    showToast("Produto duplicado!");
+};
+
+window.openEdit = (id) => {
+    const p = products.find(x => x.id === id);
+    editingId = id;
+    document.getElementById('edit-name').value = p.name;
+    document.getElementById('edit-cat').value = p.cat;
+    document.getElementById('edit-unit').value = p.unit;
+    document.getElementById('edit-overlay').classList.add('open');
+};
+
+window.closeEdit = () => document.getElementById('edit-overlay').classList.remove('open');
+
+window.saveEdit = async () => {
+    const name = document.getElementById('edit-name').value;
+    const cat = document.getElementById('edit-cat').value;
+    const unit = document.getElementById('edit-unit').value;
+    await updateDoc(doc(db, "products", editingId), { name, cat, unit });
+    window.closeEdit();
+    showToast("Atualizado!");
+};
+
+window.delProduct = async (id) => {
+    if(confirm("Excluir produto?")) await deleteDoc(doc(db, "products", id));
+};
+
+window.chg = (id, v) => {
+  const n = (quantities[id] || 0) + v;
+  if(n <= 0) delete quantities[id]; else quantities[id] = n;
+  renderOrder(); // Agora atualizamos a lista inteira para ver a mudança
+};
+
+// --- RENDERS ---
+
+// FUNÇÃO ALTERADA: Agora renderiza todos os produtos separados por título de categoria
+function renderOrder() {
+  document.getElementById('order-info').textContent = `${user} • ${date.split('-').reverse().join('/')}`;
+  const cont = document.getElementById('order-products-scroller');
+  
+  if (categories.length === 0) {
+      cont.innerHTML = '<p style="text-align:center; padding:20px; color:#aaa;">Nenhuma categoria ou produto cadastrado.</p>';
+      return;
+  }
+
+  cont.innerHTML = categories.map(c => {
+      const pList = products.filter(p => p.cat === c.name).sort((a,b) => (a.order||0) - (b.order||0));
+      if (pList.length === 0) return ''; // Não mostra categorias vazias no pedido
+
+      return `
+        <div class="order-cat-group">
+            <div class="order-cat-label">${c.name}</div>
+            ${pList.map(p => `
+                <div class="product-item">
+                  <div><b>${p.name}</b><br><small style="color:#aaa">${p.unit}</small></div>
+                  <div style="display:flex; align-items:center; gap:12px;">
+                    <button onclick="window.chg('${p.id}', -1)" style="width:30px; height:30px; border-radius:50%; border:none; background:#eee; font-weight:bold;">-</button>
+                    <span style="font-weight:800; min-width:20px; text-align:center;">${quantities[p.id] || 0}</span>
+                    <button onclick="window.chg('${p.id}', 1)" style="width:30px; height:30px; border-radius:50%; border:none; background:var(--red); color:#fff; font-weight:bold;">+</button>
+                  </div>
+                </div>`).join('')}
+        </div>`;
+  }).join('');
+}
+
+function renderCatalog() {
+    const cont = document.getElementById('catalog-grouped');
+    cont.innerHTML = categories.map((c, idx) => {
+        const pList = products.filter(p => p.cat === c.name).sort((a,b) => (a.order||0) - (b.order||0));
+        return `
+            <div class="cat-group">
+                <div class="cat-header">
+                    <span class="cat-title">${c.name}</span>
+                    <div class="order-controls">
+                        <button class="btn-order" onclick="window.moveCat(${idx}, -1)">▲</button>
+                        <button class="btn-order" onclick="window.moveCat(${idx}, 1)">▼</button>
+                        <button class="btn-order" style="color:red" onclick="window.delCategory('${c.fbId}', '${c.name}')">🗑️</button>
+                    </div>
+                </div>
+                ${pList.map(p => `
+                    <div class="product-item">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div class="order-controls" style="flex-direction:column; gap:2px;">
+                                <button class="btn-order" style="height:14px; width:20px; font-size:8px;" onclick="window.moveProd('${p.id}', '${c.name}', -1)">▲</button>
+                                <button class="btn-order" style="height:14px; width:20px; font-size:8px;" onclick="window.moveProd('${p.id}', '${c.name}', 1)">▼</button>
+                            </div>
+                            <b>${p.name}</b> <small>(${p.unit})</small>
+                        </div>
+                        <div class="menu-dots" onclick="window.toggleMenu(event, '${p.id}')">⋮
+                            <div class="dropdown" id="drop-${p.id}">
+                                <div class="dropdown-item" onclick="window.openEdit('${p.id}')">✏️ Editar</div>
+                                <div class="dropdown-item" onclick="window.duplicateProduct('${p.id}')">📋 Duplicar</div>
+                                <div class="dropdown-item" style="color:red" onclick="window.delProduct('${p.id}')">🗑️ Excluir</div>
+                            </div>
+                        </div>
+                    </div>`).join('')}
+            </div>`;
+    }).join('');
+}
+
+function renderReview() {
+    let h = '';
+    categories.forEach(c => {
+        const items = products.filter(p => p.cat === c.name && quantities[p.id]);
+        if(items.length) {
+            h += `<div style="margin-top:10px; color:red; font-weight:800; font-size:12px">${c.name.toUpperCase()}</div>`;
+            items.forEach(p => h += `<div style="padding:8px 0; border-bottom:1px solid #eee">${p.name}: <b>${quantities[p.id]} ${p.unit}</b></div>`);
+        }
+    });
+    document.getElementById('review-body').innerHTML = h || 'Nenhum item selecionado.';
+}
+
+window.generateOrder = async () => {
+  const obs = document.getElementById('order-obs').value;
+  let msg = `*PEDIDO SALGADOS DO PONTO*\n👤 *Colaborador:* ${user}\n📅 *Data:* ${date.split('-').reverse().join('/')}\n`;
+  categories.forEach(c => {
+      const items = products.filter(p => p.cat === c.name && quantities[p.id]);
+      if(items.length > 0) {
+          msg += `\n🔹 *${c.name.toUpperCase()}*\n`;
+          items.forEach(p => msg += `• ${p.name}: ${quantities[p.id]} ${p.unit}\n`);
+      }
+  });
+  if(obs) msg += `\n📝 *OBSERVAÇÃO:* ${obs}`;
+  document.getElementById('result-message').textContent = msg;
+  await addDoc(collection(db, "history"), { user, date, msg, timestamp: Date.now() });
+  window.navigate('result');
+};
+
+window.copyMessage = () => {
+    navigator.clipboard.writeText(document.getElementById('result-message').textContent);
+    showToast("Copiado!");
+};
+
+window.newOrder = () => { quantities = {}; document.getElementById('order-obs').value = ''; window.navigate('order'); };
+
+async function renderHistory() {
+    const snap = await getDocs(query(collection(db, "history"), orderBy("timestamp", "desc")));
+    document.getElementById('history-body').innerHTML = snap.docs.map(d => `<div style="padding:10px; border:1px solid #eee; border-radius:8px; margin-bottom:8px;"><b>${d.data().user}</b> - ${d.data().date}</div>`).join('');
+}
+
+function showToast(m) { const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+
+// Listeners Firebase
+onSnapshot(collection(db, "products"), snap => { 
+    products = snap.docs.map(d => ({ ...d.data(), fbId: d.id })); 
+    renderOrder(); renderCatalog(); 
+});
+
+onSnapshot(query(collection(db, "categories"), orderBy("order")), snap => { 
+    categories = snap.docs.map(d => ({ ...d.data(), fbId: d.id })); 
+    const html = categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+    document.getElementById('new-cat').innerHTML = html; 
+    document.getElementById('edit-cat').innerHTML = html;
+    renderOrder(); renderCatalog();
+});
+
+document.getElementById('login-date').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
